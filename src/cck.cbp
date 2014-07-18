@@ -35,6 +35,8 @@
 		<Unit filename="GeoCoord.h" />
 		<Unit filename="Globe.h" />
 		<Unit filename="Icosphere.h" />
+		<Unit filename="Vec3.cpp" />
+		<Unit filename="Vec3.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

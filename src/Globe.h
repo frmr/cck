@@ -13,29 +13,25 @@ namespace cck
 	{
 	private:
 
-		class Continent
+		class Node
 		{
 		private:
-
-			class Region
-			{
-			private:
-				int				id;
-				ckk::GeoCoord	center;
-				double			radius;
-			};
-
-		private:
-			int	id;
-			vector<Region>	regions;
+			size_t			id;
+			ckk::GeoCoord	loc;
+			double			radius;
 		};
 
 	private:
-		vector<Continent>	continents;
+		vector<Node>	continents;
+
+	private:
+		double	Distance( const Vec3 &pointA, const Vec3 &pointB )const;
 
 	public:
-		bool	AddContinent( const int id, const ckk::GeoCoord &center, const double radius );
-		bool	AddRegion( const int continentId, const int regionId, )
+		bool	AddNode( const size_t &id, const double &latitude, )
+
+	public:
+		Globe( const int seed, const double &radius );
 	};
 }
 #endif // CCK_GLOBE_H

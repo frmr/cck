@@ -1,18 +1,18 @@
 #ifndef CCK_GEO_COORD_H
 #define CCK_GEO_COORD_H
 
+#include "Vec3.h"
+
 namespace cck
 {
 	class GeoCoord
 	{
 	private:
-		double	latitude;
-		double	longitude;
+		cck::Vec3 ToCartesian() const;
 
 	public:
-		double	GetLatitude() const;
-		double	GetLongitude() const;
-		void	Normalise();
+		double latitude;
+		double longitude;
 
 	public:
 		GeoCoord( const double latitude, const double longitude );
