@@ -1,1 +1,2 @@
-#include "Globe.h"
+#include "cckGlobe.h"
+#include "cckError.h"

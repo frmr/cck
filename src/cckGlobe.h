@@ -3,7 +3,8 @@
 
 #include <vector>
 
-#include "GeoCoord.h"
+#include "cckGeoCoord.h"
+#include "cckError.h"
 
 using std::vector;
 
@@ -12,6 +13,8 @@ namespace cck
 	class Globe
 	{
 	private:
+
+		enum class TerrainType
 
 		class Node
 		{
@@ -28,7 +31,7 @@ namespace cck
 		double	Distance( const Vec3 &pointA, const Vec3 &pointB )const;
 
 	public:
-		bool	AddNode( const size_t &id, const double &latitude, )
+		cck::Error	AddNode( const size_t &id, const double &latitude, const double &longitude, )
 
 	public:
 		Globe( const int seed, const double &radius );

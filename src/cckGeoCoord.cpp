@@ -1,4 +1,4 @@
-#include "GeoCoord.h"
+#include "cckGeoCoord.h"
 
 cck::Vec3 ToCartesian() const
 {

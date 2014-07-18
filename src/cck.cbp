@@ -32,11 +32,13 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="GeoCoord.h" />
-		<Unit filename="Globe.h" />
-		<Unit filename="Icosphere.h" />
-		<Unit filename="Vec3.cpp" />
-		<Unit filename="Vec3.h" />
+		<Unit filename="cck.h" />
+		<Unit filename="cckError.h" />
+		<Unit filename="cckGeoCoord.cpp" />
+		<Unit filename="cckGeoCoord.h" />
+		<Unit filename="cckGlobe.h" />
+		<Unit filename="cckVec3.cpp" />
+		<Unit filename="cckVec3.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

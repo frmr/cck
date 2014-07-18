@@ -1,7 +1,7 @@
 #ifndef CCK_GEO_COORD_H
 #define CCK_GEO_COORD_H
 
-#include "Vec3.h"
+#include "cckVec3.h"
 
 namespace cck
 {
