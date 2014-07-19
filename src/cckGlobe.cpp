@@ -159,16 +159,29 @@ cck::NodeError cck::Globe::AddNode( const size_t &id, const cck::GeoCoord &coord
 	cck::Vec3 position( 0.0, 0.0, 0.0 );
 
 	nodes.push_back( std::make_shared<Node>( id, coord, position, type, nodeRadius ) );
+
+	return cck::NodeError::SUCCESS;
 }
 
 double cck::Globe::GetHeight( const double &latitude, const double &longitude ) const
 {
-	return 0.0;
+	return GetHeight( cck::GeoCoord( latitude, longitude ) );
 }
 
 double cck::Globe::GetHeight( const cck::GeoCoord &coord ) const
 {
-	return 0.0;
+	double height = 0.0;
+
+	for ( auto nodeIt : nodes )
+	{
+		double dist = Distance( coord, nodeIt->coord );
+		if ( dist < nodeIt->radius )
+		{
+			height += dist / radius;
+		}
+	}
+
+	return height;
 }
 
 size_t cck::Globe::GetNodeId( const double &latitude, const double &longitude ) const
