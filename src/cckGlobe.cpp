@@ -177,7 +177,7 @@ double cck::Globe::GetHeight( const cck::GeoCoord &coord ) const
 		double dist = Distance( coord, nodeIt->coord );
 		if ( dist < nodeIt->radius )
 		{
-			height += dist / radius;
+			height += 1.0 - ( dist / nodeIt->radius );
 		}
 	}
 
