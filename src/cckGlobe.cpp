@@ -16,8 +16,8 @@ bool cck::Globe::Link::LinksNode( const size_t &nodeId ) const
 	return false;
 }
 
-cck::Globe::Link::Link( const LinkType type, const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB )
-	:	type( type )
+cck::Globe::Link::Link( const double borderScale, const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB )
+	:	borderScale( borderScale )
 {
 	nodes.push_back( nodeA );
 	nodes.push_back( nodeB );
@@ -55,7 +55,7 @@ double cck::Globe::Distance( const GeoCoord &coordA, const GeoCoord &coordB ) co
 	return radius * acos( sin( coordA.latRadians ) * sin( coordB.latRadians ) + cos( coordA.latRadians ) * cos( coordB.latRadians ) * cos( coordB.lonRadians - coordA.lonRadians ) );
 }
 
-cck::LinkError cck::Globe::AddLink( const LinkType type, const size_t &nodeIdA, const size_t &nodeIdB )
+cck::LinkError cck::Globe::AddLink( const double borderScale, const size_t &nodeIdA, const size_t &nodeIdB )
 {
 	if ( nodeIdA < 0 || nodeIdB < 0 )
 	{
@@ -108,7 +108,7 @@ cck::LinkError cck::Globe::AddLink( const LinkType type, const size_t &nodeIdA, 
 		return cck::LinkError::ID_NOT_FOUND;
 	}
 
-    shared_ptr<Link> tempLink( new Link( type, nodePtrA, nodePtrB ) );
+    shared_ptr<Link> tempLink( new Link( borderScale, nodePtrA, nodePtrB ) );
     nodePtrA->AddLink( tempLink );
     nodePtrB->AddLink( tempLink );
 

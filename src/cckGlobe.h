@@ -15,14 +15,6 @@ namespace cck
 {
 	class Globe
 	{
-	public:
-		enum class LinkType
-		{
-			LAND,
-			SEA,
-			RANDOM
-		};
-
 	private:
 
 		class Node;
@@ -30,14 +22,14 @@ namespace cck
 		class Link
 		{
 		private:
-			LinkType					type;
+			double						borderScale;
 			vector<shared_ptr<Node>>	nodes;
 
 		public:
 			bool LinksNode( const size_t &nodeId ) const;
 
 		public:
-			Link( const LinkType type, const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB );
+			Link( const double borderScale, const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB );
 		};
 
 		class Node
@@ -71,7 +63,7 @@ namespace cck
 		double Distance( const GeoCoord &coordA, const GeoCoord &coordB )const;
 
 	public:
-		cck::LinkError	AddLink( const LinkType type, const size_t &nodeIdA, const size_t &nodeIdB );
+		cck::LinkError	AddLink( const double borderScale, const size_t &nodeIdA, const size_t &nodeIdB );
 		cck::NodeError	AddNode( const size_t &id, const double &latitude, const double &longitude, const double &nodeRadius );
 		cck::NodeError	AddNode( const size_t &id, const cck::GeoCoord &coord, const double &nodeRadius );
 
