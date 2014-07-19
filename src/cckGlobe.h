@@ -1,37 +1,82 @@
 #ifndef CCK_GLOBE_H
 #define CCK_GLOBE_H
 
+#include <memory>
 #include <vector>
 
 #include "cckGeoCoord.h"
 #include "cckError.h"
+#include "cckVec3.h"
 
+using std::shared_ptr;
 using std::vector;
 
 namespace cck
 {
 	class Globe
 	{
-	private:
-
-		enum class TerrainType
-
-		class Node
+	public:
+		enum class NodeType
 		{
-		private:
-			size_t			id;
-			ckk::GeoCoord	loc;
-			double			radius;
+			LAND,
+			SEA,
+			RANDOM
 		};
 
 	private:
-		vector<Node>	continents;
+
+		class Node;
+
+		class Link
+		{
+		private:
+			NodeType					type;
+			vector<shared_ptr<Node>>	nodes;
+
+		public:
+			bool LinksNode( const size_t &nodeId ) const;
+
+		public:
+			Link( const NodeType type, const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB );
+		};
+
+		class Node
+		{
+		public:
+			bool LinkedToNode( const size_t &nodeId ) const;
+
+		private:
+			vector<shared_ptr<Link>>	links;
+
+		public:
+			const size_t				id;
+			const cck::GeoCoord			coord;
+			const cck::Vec3				position;
+			const NodeType				type;
+			const double				radius;
+
+
+		public:
+			void AddLink( const shared_ptr<Link> newLink );
+
+		public:
+			Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const NodeType type, const double &radius );
+		};
 
 	private:
-		double	Distance( const Vec3 &pointA, const Vec3 &pointB )const;
+		double						radius;
+		vector<shared_ptr<Node>>	nodes;
+
 
 	public:
-		cck::Error	AddNode( const size_t &id, const double &latitude, const double &longitude, )
+		double Distance( const GeoCoord &coordA, const GeoCoord &coordB )const;
+
+	public:
+		cck::LinkError	AddLink( const NodeType type, const size_t &nodeIdA, const size_t &nodeIdB );
+		cck::NodeError	AddNode( const size_t &id, const double &latitude, const double &longitude, const NodeType type, const double &nodeRadius );
+		cck::NodeError	AddNode( const size_t &id, const cck::GeoCoord &coord, const NodeType type, const double &nodeRadius );
+
+
 
 	public:
 		Globe( const int seed, const double &radius );

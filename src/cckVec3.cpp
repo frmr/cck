@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-Vec3 Vec3::Unit()
+cck::Vec3 cck::Vec3::Unit()
 {
 	double length = sqrt( x * x + y * y + z * z );
 	x /= length;
@@ -12,7 +12,7 @@ Vec3 Vec3::Unit()
 	return *this;
 }
 
-Vec3::Vec3( const double &x, const double &y, const double &z )
+cck::Vec3::Vec3( const double &x, const double &y, const double &z )
 	:	x( x ), y( y ), z( z )
 {
 }

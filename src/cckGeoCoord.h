@@ -8,14 +8,16 @@ namespace cck
 	class GeoCoord
 	{
 	private:
-		cck::Vec3 ToCartesian() const;
+		//cck::Vec3 ToCartesian() const;
 
 	public:
-		double latitude;
-		double longitude;
+		const double latDegrees;
+		const double lonDegrees;
+		const double latRadians;
+		const double lonRadians;
 
 	public:
-		GeoCoord( const double latitude, const double longitude );
+		GeoCoord( const double latDegrees, const double lonDegrees );
 	};
 }
 

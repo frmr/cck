@@ -29,6 +29,7 @@
 			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-std=c++11" />
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
@@ -36,7 +37,9 @@
 		<Unit filename="cckError.h" />
 		<Unit filename="cckGeoCoord.cpp" />
 		<Unit filename="cckGeoCoord.h" />
+		<Unit filename="cckGlobe.cpp" />
 		<Unit filename="cckGlobe.h" />
+		<Unit filename="cckMath.h" />
 		<Unit filename="cckVec3.cpp" />
 		<Unit filename="cckVec3.h" />
 		<Unit filename="main.cpp" />
