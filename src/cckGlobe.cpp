@@ -1,6 +1,7 @@
 #include "cckGlobe.h"
 
 #include <cmath>
+#include <limits>
 #include "cckMath.h"
 
 bool cck::Globe::Link::LinksNode( const size_t &nodeId ) const
@@ -57,6 +58,11 @@ double cck::Globe::Distance( const GeoCoord &coordA, const GeoCoord &coordB ) co
 
 cck::LinkError cck::Globe::AddLink( const NodeType type, const size_t &nodeIdA, const size_t &nodeIdB )
 {
+	if ( nodeIdA < 0 || nodeIdB < 0 )
+	{
+		return cck::LinkError::NEGATIVE_ID;
+	}
+
 	if ( nodeIdA == nodeIdB )
 	{
 		return cck::LinkError::DUPLICATE_ID;
@@ -117,6 +123,11 @@ cck::NodeError cck::Globe::AddNode( const size_t &id, const double &latitude, co
 
 cck::NodeError cck::Globe::AddNode( const size_t &id, const cck::GeoCoord &coord, const NodeType type, const double &nodeRadius )
 {
+	if ( id < 0 )
+	{
+		return cck::NodeError::NEGATIVE_ID;
+	}
+
 	for ( auto nodeIt : nodes )
 	{
 		if ( nodeIt->id == id )
@@ -148,6 +159,38 @@ cck::NodeError cck::Globe::AddNode( const size_t &id, const cck::GeoCoord &coord
 	cck::Vec3 position( 0.0, 0.0, 0.0 );
 
 	nodes.push_back( std::make_shared<Node>( id, coord, position, type, nodeRadius ) );
+}
+
+double cck::Globe::GetHeight( const double &latitude, const double &longitude ) const
+{
+	return 0.0;
+}
+
+double cck::Globe::GetHeight( const cck::GeoCoord &coord ) const
+{
+	return 0.0;
+}
+
+size_t cck::Globe::GetNodeId( const double &latitude, const double &longitude ) const
+{
+	return GetNodeId( cck::GeoCoord( latitude, longitude ) );
+}
+
+size_t cck::Globe::GetNodeId( const cck::GeoCoord &coord ) const
+{
+	size_t closestNode = -1;
+	double closestDist = std::numeric_limits<double>::max();
+
+	for ( auto nodeIt : nodes )
+	{
+		double dist = Distance( coord, nodeIt->coord );
+		if ( dist < closestDist )
+		{
+			closestDist = dist;
+			closestNode = nodeIt->id;
+		}
+	}
+	return closestNode;
 }
 
 cck::Globe::Globe( const int seed, const double &radius )

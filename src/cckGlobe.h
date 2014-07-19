@@ -68,7 +68,7 @@ namespace cck
 		vector<shared_ptr<Node>>	nodes;
 
 
-	public:
+	private:
 		double Distance( const GeoCoord &coordA, const GeoCoord &coordB )const;
 
 	public:
@@ -76,6 +76,11 @@ namespace cck
 		cck::NodeError	AddNode( const size_t &id, const double &latitude, const double &longitude, const NodeType type, const double &nodeRadius );
 		cck::NodeError	AddNode( const size_t &id, const cck::GeoCoord &coord, const NodeType type, const double &nodeRadius );
 
+		double			GetHeight( const double &latitude, const double &longitude ) const;
+		double			GetHeight( const cck::GeoCoord &coord ) const;
+
+		size_t			GetNodeId( const double &latitude, const double &longitude ) const;
+		size_t			GetNodeId( const cck::GeoCoord &coord ) const;
 
 
 	public:

@@ -18,8 +18,7 @@ int main()
 		cout << "Success" << endl;
 	}
 
-
-	cout << globe.Distance( cck::GeoCoord( 0.0, 0.0 ), cck::GeoCoord( 0.0, 90.0 ) ) << endl;
+	cout << globe.GetNodeId( 0.0, 45.1 ) << endl;
 
 	return 0;
 }

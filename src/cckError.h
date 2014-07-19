@@ -6,6 +6,7 @@ namespace cck
 	enum class NodeError
 	{
 		SUCCESS,
+		NEGATIVE_ID,
 		ID_ALREADY_IN_USE,
 		LATITUDE_OUT_OF_RANGE,
 		LONGITUDE_OUT_OF_RANGE,
@@ -16,6 +17,7 @@ namespace cck
 	enum class LinkError
 	{
 		SUCCESS,
+		NEGATIVE_ID,
 		DUPLICATE_ID,
 		ID_NOT_FOUND,
 		NODES_ALREADY_LINKED
