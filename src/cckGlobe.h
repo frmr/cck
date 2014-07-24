@@ -62,8 +62,7 @@ namespace cck
 		private:
 			vector<shared_ptr<Node>>	nodes;
 			vector<Vec3>				edgeNormals;
-			cck::GeoCoord 				boundingBoxMin;
-			cck::GeoCoord 				boundingBoxMax;
+			//TODO: Bounding box class
 
 		public:
 			//Contains( const cck::GeoCoord &coord ) const;

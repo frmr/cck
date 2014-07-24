@@ -12,9 +12,24 @@ cck::Vec3 cck::Vec3::Unit()
 	return *this;
 }
 
+cck::Vec3 cck::Vec3::operator+( const Vec3 &rhs ) const
+{
+	return cck::Vec3( x + rhs.x, y + rhs.y, z + rhs.z );
+}
+
+cck::Vec3 cck::Vec3::operator-( const Vec3 &rhs ) const
+{
+	return cck::Vec3( x - rhs.x, y - rhs.y, z - rhs.z );
+}
+
 cck::Vec3 cck::Vec3::operator*( const double &rhs ) const
 {
-	return Vec3( x * rhs, y * rhs, z * rhs );
+	return cck::Vec3( x * rhs, y * rhs, z * rhs );
+}
+
+cck::Vec3 cck::Vec3::operator/( const double &rhs ) const
+{
+	return cck::Vec3( x / rhs, y / rhs, z / rhs );
 }
 
 cck::Vec3::Vec3( const double &x, const double &y, const double &z )
