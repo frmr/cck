@@ -6,14 +6,14 @@ using namespace std;
 int main()
 {
 	cck::Globe globe( 0, 6370.0 );
-	globe.AddNode( 0, 0.0, 0.0, cck::Globe::NodeType::LAND, 2500.0 );
+	globe.AddNode( 0, 0.0, 0.0, 2500.0 );
 
-	if ( globe.AddNode( 1, 0.0, 90.0, cck::Globe::NodeType::LAND, 2500.0 ) == cck::NodeError::SUCCESS )
+	if ( globe.AddNode( 1, 0.0, 90.0, 500.0 ) == cck::NodeError::SUCCESS )
 	{
 		cout << "Success" << endl;
 	}
 
-	if ( globe.AddLink( cck::Globe::NodeType::LAND, 0, 1 ) == cck::LinkError::SUCCESS )
+	if ( globe.AddLink( 1.0, 0, 1 ) == cck::LinkError::SUCCESS )
 	{
 		cout << "Success" << endl;
 	}

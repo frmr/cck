@@ -54,10 +54,18 @@ namespace cck
 			Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius );
 		};
 
-	private:
-		double						radius;
-		vector<shared_ptr<Node>>	nodes;
+		class Triangle
+		{
+		private:
+			cck::GeoCoord boundingBoxMin;
+			cck::GeoCoord boundingBoxMax;
 
+		};
+
+	private:
+		double							radius;
+		vector<shared_ptr<Node>>		nodes;
+		vector<shared_ptr<Triangle>>	triangles;
 
 	private:
 		double Distance( const GeoCoord &coordA, const GeoCoord &coordB )const;

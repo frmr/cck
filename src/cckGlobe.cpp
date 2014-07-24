@@ -169,18 +169,35 @@ double cck::Globe::GetHeight( const double &latitude, const double &longitude ) 
 
 double cck::Globe::GetHeight( const cck::GeoCoord &coord ) const
 {
-	double height = 0.0;
+	vector<double> heights;
 
 	for ( auto nodeIt : nodes )
 	{
 		double dist = Distance( coord, nodeIt->coord );
 		if ( dist < nodeIt->radius )
 		{
-			height += 1.0 - ( dist / nodeIt->radius );
+			double prop = dist / nodeIt->radius;
+			//height += ( 1.0 - ( prop * prop ) );
+			//height += 1.0 - prop;
+			heights.push_back( 1.0 - prop );
 		}
 	}
 
-	return height;
+	double total = 0.0;
+
+	for ( auto height : heights )
+	{
+		total += height;
+	}
+
+	if ( !heights.empty() )
+	{
+		return total;// / heights.size();
+	}
+	else
+	{
+		return 0.0;
+	}
 }
 
 size_t cck::Globe::GetNodeId( const double &latitude, const double &longitude ) const
