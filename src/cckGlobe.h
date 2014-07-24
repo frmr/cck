@@ -76,7 +76,7 @@ namespace cck
 
 
 	private:
-		double							radius;
+		double							globeRadius;
 		vector<shared_ptr<Node>>		nodes;
 		vector<shared_ptr<Triangle>>	triangles;
 

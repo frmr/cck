@@ -40,19 +40,17 @@ void cck::Globe::Node::AddLink( const shared_ptr<Link> newLink )
 	links.push_back( newLink );
 }
 
-#include <iostream>
 cck::Globe::Node::Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius )
 	:	id( id ),
 		coord( coord ),
 		position( position ),
 		radius( radius )
 {
-	std::cout << coord.latDegrees << " " << coord.lonDegrees << " " << position.x << " " << position.y << " " << position.z << std::endl;
 }
 
 double cck::Globe::Distance( const GeoCoord &coordA, const GeoCoord &coordB ) const
 {
-	return radius * acos( sin( coordA.latRadians ) * sin( coordB.latRadians ) + cos( coordA.latRadians ) * cos( coordB.latRadians ) * cos( coordB.lonRadians - coordA.lonRadians ) );
+	return globeRadius * acos( sin( coordA.latRadians ) * sin( coordB.latRadians ) + cos( coordA.latRadians ) * cos( coordB.latRadians ) * cos( coordB.lonRadians - coordA.lonRadians ) );
 }
 
 cck::LinkError cck::Globe::AddLink( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale )
@@ -149,12 +147,12 @@ cck::NodeError cck::Globe::AddNode( const size_t &id, const cck::GeoCoord &coord
 	{
 		return cck::NodeError::NEGATIVE_RADIUS;
 	}
-	else if ( nodeRadius > cck::pi * radius )
+	else if ( nodeRadius > cck::pi * globeRadius )
 	{
 		return cck::NodeError::DIAMETER_EXCEEDS_SPHERE_CIRCUMFERENCE;
 	}
 
-	nodes.push_back( std::make_shared<Node>( id, coord, coord.ToCartesian( radius ), nodeRadius ) );
+	nodes.push_back( std::make_shared<Node>( id, coord, coord.ToCartesian( globeRadius ), nodeRadius ) );
 
 	return cck::NodeError::SUCCESS;
 }
@@ -219,8 +217,8 @@ size_t cck::Globe::GetNodeId( const cck::GeoCoord &coord ) const
 	return closestNode;
 }
 
-cck::Globe::Globe( const int seed, const double &radius )
-	:	radius( radius )
+cck::Globe::Globe( const int seed, const double &globeRadius )
+	:	globeRadius( globeRadius )
 {
 
 }
