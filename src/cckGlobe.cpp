@@ -16,7 +16,7 @@ bool cck::Globe::Link::LinksNode( const size_t &nodeId ) const
 	return false;
 }
 
-cck::Globe::Link::Link( const double borderScale, const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB )
+cck::Globe::Link::Link( const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB, const double borderScale )
 	:	borderScale( borderScale )
 {
 	nodes.push_back( nodeA );
@@ -40,22 +40,22 @@ void cck::Globe::Node::AddLink( const shared_ptr<Link> newLink )
 	links.push_back( newLink );
 }
 
+#include <iostream>
 cck::Globe::Node::Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius )
 	:	id( id ),
 		coord( coord ),
 		position( position ),
 		radius( radius )
 {
+	std::cout << coord.latDegrees << " " << coord.lonDegrees << " " << position.x << " " << position.y << " " << position.z << std::endl;
 }
 
 double cck::Globe::Distance( const GeoCoord &coordA, const GeoCoord &coordB ) const
 {
-	//find angle between points
-	//return arc length
 	return radius * acos( sin( coordA.latRadians ) * sin( coordB.latRadians ) + cos( coordA.latRadians ) * cos( coordB.latRadians ) * cos( coordB.lonRadians - coordA.lonRadians ) );
 }
 
-cck::LinkError cck::Globe::AddLink( const double borderScale, const size_t &nodeIdA, const size_t &nodeIdB )
+cck::LinkError cck::Globe::AddLink( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale )
 {
 	if ( nodeIdA < 0 || nodeIdB < 0 )
 	{
@@ -108,7 +108,7 @@ cck::LinkError cck::Globe::AddLink( const double borderScale, const size_t &node
 		return cck::LinkError::ID_NOT_FOUND;
 	}
 
-    shared_ptr<Link> tempLink( new Link( borderScale, nodePtrA, nodePtrB ) );
+    shared_ptr<Link> tempLink( new Link( nodePtrA, nodePtrB, borderScale ) );
     nodePtrA->AddLink( tempLink );
     nodePtrB->AddLink( tempLink );
 
@@ -154,10 +154,7 @@ cck::NodeError cck::Globe::AddNode( const size_t &id, const cck::GeoCoord &coord
 		return cck::NodeError::DIAMETER_EXCEEDS_SPHERE_CIRCUMFERENCE;
 	}
 
-	//convert coord to position
-	cck::Vec3 position( 0.0, 0.0, 0.0 );
-
-	nodes.push_back( std::make_shared<Node>( id, coord, position, nodeRadius ) );
+	nodes.push_back( std::make_shared<Node>( id, coord, coord.ToCartesian( radius ), nodeRadius ) );
 
 	return cck::NodeError::SUCCESS;
 }

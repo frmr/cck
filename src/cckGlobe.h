@@ -19,6 +19,7 @@ namespace cck
 
 		class Node;
 
+
 		class Link
 		{
 		private:
@@ -29,8 +30,9 @@ namespace cck
 			bool LinksNode( const size_t &nodeId ) const;
 
 		public:
-			Link( const double borderScale, const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB );
+			Link( const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB, const double borderScale );
 		};
+
 
 		class Node
 		{
@@ -54,13 +56,24 @@ namespace cck
 			Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius );
 		};
 
+
 		class Triangle
 		{
 		private:
-			cck::GeoCoord boundingBoxMin;
-			cck::GeoCoord boundingBoxMax;
+			vector<shared_ptr<Node>>	nodes;
+			vector<Vec3>				edgeNormals;
+			cck::GeoCoord 				boundingBoxMin;
+			cck::GeoCoord 				boundingBoxMax;
+
+		public:
+			//Contains( const cck::GeoCoord &coord ) const;
+
+
+		public:
+			//Triangle( const vector<shared_ptr<Node>> &nodes, )
 
 		};
+
 
 	private:
 		double							radius;
@@ -71,7 +84,7 @@ namespace cck
 		double Distance( const GeoCoord &coordA, const GeoCoord &coordB )const;
 
 	public:
-		cck::LinkError	AddLink( const double borderScale, const size_t &nodeIdA, const size_t &nodeIdB );
+		cck::LinkError	AddLink( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale );
 		cck::NodeError	AddNode( const size_t &id, const double &latitude, const double &longitude, const double &nodeRadius );
 		cck::NodeError	AddNode( const size_t &id, const cck::GeoCoord &coord, const double &nodeRadius );
 
