@@ -4,18 +4,22 @@
 #include <limits>
 #include "cckMath.h"
 
+void cck::Globe::Edge::AddSides()
+{
+	sides.push_back( std::make_shared<Side>( nodeA, nodeB, shared_from_this() ) );
+	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
+}
+
 cck::Globe::Edge::Edge( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const double borderScale )
 	:	nodeA( nodeA ),
 		nodeB( nodeB ),
 		borderScale( borderScale )
 {
-	sides.push_back( make_shared<Side>( nodeA, nodeB,  ) );
 }
 
-cck::Globe::Side::Side( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Edge> &edge, const shared_ptr<Side> &twin )
-	:	normal( CrossProduct( nodeA.position.Unit(), nodeB.position.Unit() ) ),
-		edge( edge ),
-		twin( twin )
+cck::Globe::Side::Side( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Edge> &edge )
+	:	normal( cck::CrossProduct( nodeA->position.Unit(), nodeB->position.Unit() ) ),
+		edge( edge )
 {
 }
 
@@ -25,7 +29,7 @@ bool cck::Globe::Link::LinksTo( const size_t &nodeId ) const
 }
 
 cck::Globe::Link::Link( const shared_ptr<Node> &target, const shared_ptr<Edge> &edge )
-	:	target( targete ),
+	:	target( target ),
 		edge( edge )
 {
 }
@@ -119,8 +123,9 @@ cck::LinkError cck::Globe::LinkNodes( const size_t &nodeIdA, const size_t &nodeI
 	}
 
 	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, borderScale ) );
-	nodePtrA->AddLink( make_shared<Link>( nodePtrB, tempEdge ) );
-	nodePtrB->AddLink( make_shared<Link>( nodePtrA, tempEdge ) );
+	tempEdge->AddSides();
+	nodePtrA->AddLink( std::make_shared<Link>( nodePtrB, tempEdge ) );
+	nodePtrB->AddLink( std::make_shared<Link>( nodePtrA, tempEdge ) );
 	edges.push_back( tempEdge );
 
     return cck::LinkError::SUCCESS;

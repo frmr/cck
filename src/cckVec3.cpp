@@ -2,14 +2,10 @@
 
 #include <cmath>
 
-cck::Vec3 cck::Vec3::Unit()
+cck::Vec3 cck::Vec3::Unit() const
 {
 	double length = sqrt( x * x + y * y + z * z );
-	x /= length;
-	y /= length;
-	z /= length;
-
-	return *this;
+	return cck::Vec3( x / length, y / length, z / length );
 }
 
 cck::Vec3 cck::Vec3::operator+( const Vec3 &rhs ) const

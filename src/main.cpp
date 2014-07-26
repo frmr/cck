@@ -13,7 +13,7 @@ int main()
 		cout << "Success" << endl;
 	}
 
-	if ( globe.AddLink( 0, 1, 1.0 ) == cck::LinkError::SUCCESS )
+	if ( globe.LinkNodes( 0, 1, 1.0 ) == cck::LinkError::SUCCESS )
 	{
 		cout << "Success" << endl;
 	}
