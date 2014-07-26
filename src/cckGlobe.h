@@ -18,26 +18,63 @@ namespace cck
 	private:
 
 		class Node;
+		class Side;
+
+
+
+
+		class Edge
+		{
+		private:
+			shared_ptr<Node>			nodeA;
+			shared_ptr<Node>			nodeB;
+			vector<shared_ptr<Side>>	sides;
+
+		public:
+			const double				borderScale;
+
+		public:
+			Edge( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const double borderScale );
+		};
+
+
+
+
+		class Side
+		{
+		public:
+			const cck::Vec3			normal;
+			const shared_ptr<Edge>	edge;
+			const shared_ptr<Side>	twin;
+
+		public:
+			Side( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Edge> &edge, const shared_ptr<Side> &twin );
+		};
+
+
 
 
 		class Link
 		{
-		private:
-			double						borderScale;
-			vector<shared_ptr<Node>>	nodes;
+		public:
+			const shared_ptr<Node>	target;
+			const shared_ptr<Edge>	edge;
 
 		public:
-			bool LinksNode( const size_t &nodeId ) const;
+			bool LinksTo( const size_t &nodeId ) const;
 
 		public:
-			Link( const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB, const double borderScale );
+			Link( const shared_ptr<Node> &target, const shared_ptr<Edge> &edge );
 		};
+
+
 
 
 		class Node
 		{
 		public:
-			bool LinkedToNode( const size_t &nodeId ) const;
+			bool						LinkedTo( const size_t &nodeId ) const;
+			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node> &refNode );
 
 		private:
 			vector<shared_ptr<Link>>	links;
@@ -48,20 +85,21 @@ namespace cck
 			const cck::Vec3				position;
 			const double				radius;
 
-
 		public:
-			void AddLink( const shared_ptr<Link> newLink );
+			void AddLink( const shared_ptr<Link> &newLink );
 
 		public:
 			Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius );
 		};
 
 
+
+
 		class Triangle
 		{
 		private:
 			vector<shared_ptr<Node>>	nodes;
-			vector<Vec3>				edgeNormals;
+			vector<shared_ptr<Side>>	sides;
 			//TODO: Bounding box class
 
 		public:
@@ -77,13 +115,14 @@ namespace cck
 	private:
 		double							globeRadius;
 		vector<shared_ptr<Node>>		nodes;
+		vector<shared_ptr<Edge>>		edges;
 		vector<shared_ptr<Triangle>>	triangles;
 
 	private:
-		double Distance( const GeoCoord &coordA, const GeoCoord &coordB )const;
+		double Distance( const GeoCoord &coordA, const GeoCoord &coordB ) const;
 
 	public:
-		cck::LinkError	AddLink( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale );
+		cck::LinkError	LinkNodes( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale );
 		cck::NodeError	AddNode( const size_t &id, const double &latitude, const double &longitude, const double &nodeRadius );
 		cck::NodeError	AddNode( const size_t &id, const cck::GeoCoord &coord, const double &nodeRadius );
 

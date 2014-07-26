@@ -4,30 +4,37 @@
 #include <limits>
 #include "cckMath.h"
 
-bool cck::Globe::Link::LinksNode( const size_t &nodeId ) const
+cck::Globe::Edge::Edge( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const double borderScale )
+	:	nodeA( nodeA ),
+		nodeB( nodeB ),
+		borderScale( borderScale )
 {
-	for ( auto nodeIt : nodes )
-	{
-		if ( nodeIt->id == nodeId )
-		{
-			return true;
-		}
-	}
-	return false;
+	sides.push_back( make_shared<Side>( nodeA, nodeB,  ) );
 }
 
-cck::Globe::Link::Link( const shared_ptr<Node> nodeA, const shared_ptr<Node> nodeB, const double borderScale )
-	:	borderScale( borderScale )
+cck::Globe::Side::Side( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Edge> &edge, const shared_ptr<Side> &twin )
+	:	normal( CrossProduct( nodeA.position.Unit(), nodeB.position.Unit() ) ),
+		edge( edge ),
+		twin( twin )
 {
-	nodes.push_back( nodeA );
-	nodes.push_back( nodeB );
 }
 
-bool cck::Globe::Node::LinkedToNode( const size_t &nodeId ) const
+bool cck::Globe::Link::LinksTo( const size_t &nodeId ) const
+{
+	return ( target->id == nodeId ) ? true : false;
+}
+
+cck::Globe::Link::Link( const shared_ptr<Node> &target, const shared_ptr<Edge> &edge )
+	:	target( targete ),
+		edge( edge )
+{
+}
+
+bool cck::Globe::Node::LinkedTo( const size_t &nodeId ) const
 {
 	for ( auto linkIt : links )
 	{
-		if ( linkIt->LinksNode( nodeId ) )
+		if ( linkIt->LinksTo( nodeId ) )
 		{
 			return true;
 		}
@@ -35,7 +42,12 @@ bool cck::Globe::Node::LinkedToNode( const size_t &nodeId ) const
 	return false;
 }
 
-void cck::Globe::Node::AddLink( const shared_ptr<Link> newLink )
+vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( const shared_ptr<cck::Globe::Node> &refNode )
+{
+	//for ( )
+}
+
+void cck::Globe::Node::AddLink( const shared_ptr<Link> &newLink )
 {
 	links.push_back( newLink );
 }
@@ -53,7 +65,7 @@ double cck::Globe::Distance( const GeoCoord &coordA, const GeoCoord &coordB ) co
 	return globeRadius * acos( sin( coordA.latRadians ) * sin( coordB.latRadians ) + cos( coordA.latRadians ) * cos( coordB.latRadians ) * cos( coordB.lonRadians - coordA.lonRadians ) );
 }
 
-cck::LinkError cck::Globe::AddLink( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale )
+cck::LinkError cck::Globe::LinkNodes( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale )
 {
 	if ( nodeIdA < 0 || nodeIdB < 0 )
 	{
@@ -74,7 +86,7 @@ cck::LinkError cck::Globe::AddLink( const size_t &nodeIdA, const size_t &nodeIdB
 		{
 			if ( nodeIt->id == nodeIdA )
 			{
-				if ( nodeIt->LinkedToNode( nodeIdB ) )
+				if ( nodeIt->LinkedTo( nodeIdB ) )
 				{
 					return cck::LinkError::NODES_ALREADY_LINKED;
 				}
@@ -85,7 +97,7 @@ cck::LinkError cck::Globe::AddLink( const size_t &nodeIdA, const size_t &nodeIdB
 			}
 			else if ( nodeIt->id == nodeIdB )
 			{
-				if ( nodeIt->LinkedToNode( nodeIdA ) )
+				if ( nodeIt->LinkedTo( nodeIdA ) )
 				{
 					return cck::LinkError::NODES_ALREADY_LINKED;
 				}
@@ -106,9 +118,10 @@ cck::LinkError cck::Globe::AddLink( const size_t &nodeIdA, const size_t &nodeIdB
 		return cck::LinkError::ID_NOT_FOUND;
 	}
 
-    shared_ptr<Link> tempLink( new Link( nodePtrA, nodePtrB, borderScale ) );
-    nodePtrA->AddLink( tempLink );
-    nodePtrB->AddLink( tempLink );
+	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, borderScale ) );
+	nodePtrA->AddLink( make_shared<Link>( nodePtrB, tempEdge ) );
+	nodePtrB->AddLink( make_shared<Link>( nodePtrA, tempEdge ) );
+	edges.push_back( tempEdge );
 
     return cck::LinkError::SUCCESS;
 }

@@ -39,6 +39,7 @@
 		<Unit filename="cckGeoCoord.h" />
 		<Unit filename="cckGlobe.cpp" />
 		<Unit filename="cckGlobe.h" />
+		<Unit filename="cckMath.cpp" />
 		<Unit filename="cckMath.h" />
 		<Unit filename="cckVec3.cpp" />
 		<Unit filename="cckVec3.h" />
