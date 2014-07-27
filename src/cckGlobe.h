@@ -25,8 +25,6 @@ namespace cck
 
 		class Edge: public std::enable_shared_from_this<Edge>
 		{
-		private:
-
 		public:
 			const shared_ptr<Node>		nodeA;
 			const shared_ptr<Node>		nodeB;

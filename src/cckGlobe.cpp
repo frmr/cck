@@ -114,7 +114,13 @@ cck::Globe::Triangle::Triangle( const vector<shared_ptr<Node>> &nodes, const vec
 	//dot product with each edge side
 	for ( auto edge : edges )
 	{
-
+		for ( auto side : edge->sides )
+		{
+			if ( DotProduct( average, side->normal ) >= 0.0 )
+			{
+				this->sides.push_back( side );
+			}
+		}
 	}
 
 }
