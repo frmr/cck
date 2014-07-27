@@ -10,6 +10,11 @@ void cck::Globe::Edge::AddSides()
 	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
 }
 
+cck::Vec3 cck::Globe::Edge::GetNormal() const
+{
+	return (*sides.begin())->normal;
+}
+
 cck::Globe::Edge::Edge( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const double borderScale )
 	:	nodeA( nodeA ),
 		nodeB( nodeB ),
@@ -48,7 +53,16 @@ bool cck::Globe::Node::LinkedTo( const size_t &nodeId ) const
 
 vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( const shared_ptr<cck::Globe::Node> &refNode )
 {
-	//for ( )
+	vector<shared_ptr<Node>> commonNeighbors;
+
+	for ( auto link : links )
+	{
+		if ( refNode->LinkedTo( link->target->id ) )
+		{
+			commonNeighbors.push_back( link->target );
+		}
+	}
+	return commonNeighbors;
 }
 
 void cck::Globe::Node::AddLink( const shared_ptr<Link> &newLink )
@@ -62,6 +76,32 @@ cck::Globe::Node::Node( const size_t &id, const cck::GeoCoord &coord, const Vec3
 		position( position ),
 		radius( radius )
 {
+}
+
+bool cck::Globe::Triangle::Contains( const cck::GeoCoord &coord ) const
+{
+	for ( auto side : sides )
+	{
+		if ( DotProduct(  ) )
+	}
+}
+
+double	cck::Globe::Triangle::GetHeight( const cck::GeoCoord &coord ) const
+{
+	//dist to each node
+	//save in map
+	//for each side, calculate height
+	//return average height
+}
+
+cck::Globe::Triangle::Triangle( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Node> &nodeC, const vector<shared_ptr<Edge>> &edges )
+{
+	nodes.push_back( nodeA );
+	nodes.push_back( nodeB );
+	nodes.push_back( nodeC );
+
+	//get average of nodes
+	//dot product with each edge side
 }
 
 double cck::Globe::Distance( const GeoCoord &coordA, const GeoCoord &coordB ) const

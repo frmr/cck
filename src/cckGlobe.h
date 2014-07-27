@@ -49,6 +49,7 @@ namespace cck
 		public:
 			const cck::Vec3			normal;
 			const shared_ptr<Edge>	edge;
+			//TODO: Add Triangle variable, can only have one
 
 		public:
 			Side( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Edge> &edge );
@@ -75,12 +76,12 @@ namespace cck
 
 		class Node
 		{
+		private:
+			vector<shared_ptr<Link>>	links;
+
 		public:
 			bool						LinkedTo( const size_t &nodeId ) const;
 			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node> &refNode );
-
-		private:
-			vector<shared_ptr<Link>>	links;
 
 		public:
 			const size_t				id;
@@ -106,11 +107,13 @@ namespace cck
 			//TODO: Bounding box class
 
 		public:
-			//Contains( const cck::GeoCoord &coord ) const;
+			bool 	Contains( const cck::GeoCoord &coord ) const;
+			double	GetHeight( const cck::GeoCoord &coord ) const;
 
 
 		public:
-			//Triangle( const vector<shared_ptr<Node>> &nodes, )
+			//Triangle( const vector<shared_ptr<Node>> &nodes, const vector<shared_ptr<Edge> &edges );
+			Triangle( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Node> &nodeC, const vector<shared_ptr<Edge>> &edges );
 
 		};
 
