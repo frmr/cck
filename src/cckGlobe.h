@@ -26,16 +26,16 @@ namespace cck
 		class Edge: public std::enable_shared_from_this<Edge>
 		{
 		private:
-			vector<shared_ptr<Side>>	sides;
 
 		public:
 			const shared_ptr<Node>		nodeA;
 			const shared_ptr<Node>		nodeB;
 			const double				borderScale;
+			vector<shared_ptr<Side>>	sides;
 
 		public:
-			void		AddSides();
-			cck::Vec3	GetNormal() const;
+			void						AddSides();
+			cck::Vec3					GetNormal() const;
 
 		public:
 			Edge( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const double borderScale );
