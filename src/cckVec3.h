@@ -16,7 +16,13 @@ namespace cck
 		Vec3	operator*( const double &rhs ) const;
 		Vec3	operator/( const double &rhs ) const;
 
+		Vec3&	operator+=( const Vec3 &rhs );
+		Vec3&	operator-=( const Vec3 &rhs );
+		Vec3&	operator*=( const double &rhs );
+		Vec3&	operator/=( const double &rhs );
+
 	public:
+		Vec3();
 		Vec3( const double &x, const double &y, const double &z );
 	};
 }

@@ -78,12 +78,16 @@ cck::Globe::Node::Node( const size_t &id, const cck::GeoCoord &coord, const Vec3
 {
 }
 
-bool cck::Globe::Triangle::Contains( const cck::GeoCoord &coord ) const
+bool cck::Globe::Triangle::Contains( const cck::Vec3 &unitVec ) const
 {
 	for ( auto side : sides )
 	{
-		if ( DotProduct(  ) )
+		if ( DotProduct( unitVec, side->normal ) < 0.0 )
+		{
+			return false;
+		}
 	}
+	return true;
 }
 
 double	cck::Globe::Triangle::GetHeight( const cck::GeoCoord &coord ) const
@@ -94,14 +98,25 @@ double	cck::Globe::Triangle::GetHeight( const cck::GeoCoord &coord ) const
 	//return average height
 }
 
-cck::Globe::Triangle::Triangle( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Node> &nodeC, const vector<shared_ptr<Edge>> &edges )
+cck::Globe::Triangle::Triangle( const vector<shared_ptr<Node>> &nodes, const vector<shared_ptr<Edge>> &edges )
+	:	nodes( nodes )
 {
-	nodes.push_back( nodeA );
-	nodes.push_back( nodeB );
-	nodes.push_back( nodeC );
+	cck::Vec3 average;
 
-	//get average of nodes
+	for ( auto node : nodes )
+	{
+		average += *node->position;
+	}
+
+	average /= 3.0;
+	average = average.Unit();
+
 	//dot product with each edge side
+	for ( auto edge : edges )
+	{
+
+	}
+
 }
 
 double cck::Globe::Distance( const GeoCoord &coordA, const GeoCoord &coordB ) const
@@ -167,6 +182,8 @@ cck::LinkError cck::Globe::LinkNodes( const size_t &nodeIdA, const size_t &nodeI
 	nodePtrA->AddLink( std::make_shared<Link>( nodePtrB, tempEdge ) );
 	nodePtrB->AddLink( std::make_shared<Link>( nodePtrA, tempEdge ) );
 	edges.push_back( tempEdge );
+
+	vector<shared_ptr<Node>> commonNeighbors = nodePtrA->FindCommonNeighbors( nodePtrB );
 
     return cck::LinkError::SUCCESS;
 }

@@ -107,13 +107,13 @@ namespace cck
 			//TODO: Bounding box class
 
 		public:
-			bool 	Contains( const cck::GeoCoord &coord ) const;
+			bool 	Contains( const cck::Vec3 &unitVec ) const;
 			double	GetHeight( const cck::GeoCoord &coord ) const;
 
 
 		public:
 			//Triangle( const vector<shared_ptr<Node>> &nodes, const vector<shared_ptr<Edge> &edges );
-			Triangle( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Node> &nodeC, const vector<shared_ptr<Edge>> &edges );
+			Triangle( const vector<shared_ptr<Node>> &nodes, const vector<shared_ptr<Edge>> &edges );
 
 		};
 
