@@ -78,8 +78,8 @@ namespace cck
 			vector<shared_ptr<Link>>	links;
 
 		public:
-			bool						LinkedTo( const size_t &nodeId ) const;
-			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node> &refNode );
+
+
 
 		public:
 			const size_t				id;
@@ -88,7 +88,10 @@ namespace cck
 			const double				radius;
 
 		public:
-			void AddLink( const shared_ptr<Link> &newLink );
+			void 						AddLink( const shared_ptr<Link> &newLink );
+			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node> &refNode );
+			shared_ptr<Link>			GetLinkTo( const size_t &targetId ) const; //TODO: Remove this?
+			bool						LinkedTo( const size_t &nodeId ) const;
 
 		public:
 			Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius );
@@ -110,8 +113,7 @@ namespace cck
 
 
 		public:
-			//Triangle( const vector<shared_ptr<Node>> &nodes, const vector<shared_ptr<Edge> &edges );
-			Triangle( const vector<shared_ptr<Node>> &nodes, const vector<shared_ptr<Edge>> &edges );
+			Triangle( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Node> &nodeC, const vector<shared_ptr<Edge>> &edges );
 
 		};
 

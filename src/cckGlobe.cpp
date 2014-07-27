@@ -65,6 +65,18 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( cons
 	return commonNeighbors;
 }
 
+shared_ptr<cck::Globe::Link> cck::Globe::Node::GetLinkTo( const size_t &targetId ) const
+{
+	for ( auto link : links )
+	{
+		if ( link->target->id == targetId )
+		{
+			return link;
+		}
+	}
+	return nullptr;
+}
+
 void cck::Globe::Node::AddLink( const shared_ptr<Link> &newLink )
 {
 	links.push_back( newLink );
@@ -98,17 +110,13 @@ double	cck::Globe::Triangle::GetHeight( const cck::GeoCoord &coord ) const
 	//return average height
 }
 
-cck::Globe::Triangle::Triangle( const vector<shared_ptr<Node>> &nodes, const vector<shared_ptr<Edge>> &edges )
-	:	nodes( nodes )
+cck::Globe::Triangle::Triangle( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &nodeB, const shared_ptr<Node> &nodeC, const vector<shared_ptr<Edge>> &edges )
 {
-	cck::Vec3 average;
+	nodes.push_back( nodeA );
+	nodes.push_back( nodeB );
+	nodes.push_back( nodeC );
 
-	for ( auto node : nodes )
-	{
-		average += node->position;
-	}
-
-	average /= 3.0;
+	cck::Vec3 average = ( nodeA->position + nodeB->position + nodeC->position ) / 3.0;
 	average = average.Unit();
 
 	//dot product with each edge side
@@ -189,7 +197,16 @@ cck::LinkError cck::Globe::LinkNodes( const size_t &nodeIdA, const size_t &nodeI
 	nodePtrB->AddLink( std::make_shared<Link>( nodePtrA, tempEdge ) );
 	edges.push_back( tempEdge );
 
-	vector<shared_ptr<Node>> commonNeighbors = nodePtrA->FindCommonNeighbors( nodePtrB );
+	vector<shared_ptr<Node>> commonNeighbors = nodePtrA->FindCommonNeighbors( nodePtrB ); //TODO: Tidy this and below loop up
+
+	for ( auto neighbor : commonNeighbors )
+	{
+		vector<shared_ptr<Edge>> commonEdges;
+		commonEdges.push_back( nodePtrA->GetLinkTo( nodePtrB->id )->edge );
+		commonEdges.push_back( nodePtrB->GetLinkTo( neighbor->id )->edge );
+		commonEdges.push_back( neighbor->GetLinkTo( nodePtrA->id )->edge );
+		triangles.push_back( std::make_shared<Triangle>( nodePtrA, nodePtrB, neighbor, commonEdges ) );
+	}
 
     return cck::LinkError::SUCCESS;
 }
@@ -245,35 +262,47 @@ double cck::Globe::GetHeight( const double &latitude, const double &longitude ) 
 
 double cck::Globe::GetHeight( const cck::GeoCoord &coord ) const
 {
-	vector<double> heights;
+//	vector<double> heights;
+//
+//	for ( auto nodeIt : nodes )
+//	{
+//		double dist = Distance( coord, nodeIt->coord );
+//		if ( dist < nodeIt->radius )
+//		{
+//			double prop = dist / nodeIt->radius;
+//			//height += ( 1.0 - ( prop * prop ) );
+//			//height += 1.0 - prop;
+//			heights.push_back( 1.0 - prop );
+//		}
+//	}
+//
+//	double total = 0.0;
+//
+//	for ( auto height : heights )
+//	{
+//		total += height;
+//	}
+//
+//	if ( !heights.empty() )
+//	{
+//		return total;// / heights.size();
+//	}
+//	else
+//	{
+//		return 0.0;
+//	}
 
-	for ( auto nodeIt : nodes )
+	cck::Vec3 coordVec = coord.ToCartesian( globeRadius ).Unit();
+
+	for ( auto triangle : triangles )
 	{
-		double dist = Distance( coord, nodeIt->coord );
-		if ( dist < nodeIt->radius )
+		if ( triangle->Contains( coordVec ) )
 		{
-			double prop = dist / nodeIt->radius;
-			//height += ( 1.0 - ( prop * prop ) );
-			//height += 1.0 - prop;
-			heights.push_back( 1.0 - prop );
+			return 1.0;
 		}
 	}
+	return 0.0;
 
-	double total = 0.0;
-
-	for ( auto height : heights )
-	{
-		total += height;
-	}
-
-	if ( !heights.empty() )
-	{
-		return total;// / heights.size();
-	}
-	else
-	{
-		return 0.0;
-	}
 }
 
 size_t cck::Globe::GetNodeId( const double &latitude, const double &longitude ) const
