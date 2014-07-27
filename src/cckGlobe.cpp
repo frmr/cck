@@ -105,7 +105,7 @@ cck::Globe::Triangle::Triangle( const vector<shared_ptr<Node>> &nodes, const vec
 
 	for ( auto node : nodes )
 	{
-		average += *node->position;
+		average += node->position;
 	}
 
 	average /= 3.0;

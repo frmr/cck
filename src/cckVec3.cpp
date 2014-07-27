@@ -30,17 +30,17 @@ cck::Vec3 cck::Vec3::operator/( const double &rhs ) const
 
 cck::Vec3& cck::Vec3::operator+=( const Vec3 &rhs )
 {
-	x += rhs->x;
-	y += rhs->y;
-	z += rhs->z;
+	x += rhs.x;
+	y += rhs.y;
+	z += rhs.z;
 	return *this;
 }
 
 cck::Vec3& cck::Vec3::operator-=( const Vec3 &rhs )
 {
-	x -= rhs->x;
-	y -= rhs->y;
-	z -= rhs->z;
+	x -= rhs.x;
+	y -= rhs.y;
+	z -= rhs.z;
 	return *this;
 }
 
@@ -61,7 +61,7 @@ cck::Vec3& cck::Vec3::operator/=( const double &rhs )
 }
 
 cck::Vec3::Vec3()
-	x( 0.0 ), y( 0.0 ), z( 0.0 )
+	:	x( 0.0 ), y( 0.0 ), z( 0.0 )
 {
 }
 
