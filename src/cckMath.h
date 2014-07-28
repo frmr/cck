@@ -2,6 +2,7 @@
 #define CCK_MATH_H
 
 #include "cckVec3.h"
+#include "cckGeoCoord.h"
 
 namespace cck
 {
@@ -9,6 +10,8 @@ namespace cck
 
 	cck::Vec3	CrossProduct( const cck::Vec3 &vecA, const cck::Vec3 &vecB );
 	double		DotProduct( const cck::Vec3 &vecA, const cck::Vec3 &vecB );
+
+	double 		Distance( const cck::GeoCoord &coordA, const cck::GeoCoord &coordB, const double &radius );
 }
 
 #endif // CCK_MATH_H

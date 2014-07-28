@@ -110,6 +110,7 @@ namespace cck
 		public:
 			bool 	Contains( const cck::Vec3 &unitVec ) const;
 			double	GetHeight( const cck::GeoCoord &coord ) const;
+			size_t	GetNodeId( const cck::GeoCoord &coord, const double &globeRadius ) const;
 
 
 		public:
@@ -123,9 +124,6 @@ namespace cck
 		vector<shared_ptr<Node>>		nodes;
 		vector<shared_ptr<Edge>>		edges;
 		vector<shared_ptr<Triangle>>	triangles;
-
-	private:
-		double Distance( const GeoCoord &coordA, const GeoCoord &coordB ) const;
 
 	public:
 		cck::LinkError	LinkNodes( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale );
