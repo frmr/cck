@@ -28,7 +28,7 @@ cck::Globe::Side::Side( const shared_ptr<Node> &nodeA, const shared_ptr<Node> &n
 {
 }
 
-bool cck::Globe::Link::LinksTo( const size_t &nodeId ) const
+bool cck::Globe::Link::LinksTo( const int &nodeId ) const
 {
 	return ( target->id == nodeId ) ? true : false;
 }
@@ -39,7 +39,7 @@ cck::Globe::Link::Link( const shared_ptr<Node> &target, const shared_ptr<Edge> &
 {
 }
 
-bool cck::Globe::Node::LinkedTo( const size_t &nodeId ) const
+bool cck::Globe::Node::LinkedTo( const int &nodeId ) const
 {
 	for ( auto linkIt : links )
 	{
@@ -65,7 +65,7 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( cons
 	return commonNeighbors;
 }
 
-shared_ptr<cck::Globe::Link> cck::Globe::Node::GetLinkTo( const size_t &targetId ) const
+shared_ptr<cck::Globe::Link> cck::Globe::Node::GetLinkTo( const int &targetId ) const
 {
 	for ( auto link : links )
 	{
@@ -82,7 +82,7 @@ void cck::Globe::Node::AddLink( const shared_ptr<Link> &newLink )
 	links.push_back( newLink );
 }
 
-cck::Globe::Node::Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius )
+cck::Globe::Node::Node( const int &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius )
 	:	id( id ),
 		coord( coord ),
 		position( position ),
@@ -110,9 +110,9 @@ double	cck::Globe::Triangle::GetHeight( const cck::GeoCoord &coord ) const
 	//return average height
 }
 
-size_t cck::Globe::Triangle::GetNodeId( const cck::GeoCoord &coord, const double &globeRadius ) const
+int cck::Globe::Triangle::GetNodeId( const cck::GeoCoord &coord, const double &globeRadius ) const
 {
-	size_t closestNode = -1;
+	int closestNode = -1;
 	double closestDist = std::numeric_limits<double>::max();
 
     for ( auto node : nodes )
@@ -150,7 +150,7 @@ cck::Globe::Triangle::Triangle( const shared_ptr<Node> &nodeA, const shared_ptr<
 
 }
 
-cck::LinkError cck::Globe::LinkNodes( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale )
+cck::LinkError cck::Globe::LinkNodes( const int &nodeIdA, const int &nodeIdB, const double borderScale )
 {
 	if ( nodeIdA < 0 || nodeIdB < 0 )
 	{
@@ -223,12 +223,12 @@ cck::LinkError cck::Globe::LinkNodes( const size_t &nodeIdA, const size_t &nodeI
     return cck::LinkError::SUCCESS;
 }
 
-cck::NodeError cck::Globe::AddNode( const size_t &id, const double &latitude, const double &longitude, const double &nodeRadius )
+cck::NodeError cck::Globe::AddNode( const int &id, const double &latitude, const double &longitude, const double &nodeRadius )
 {
 	return AddNode( id, cck::GeoCoord( latitude, longitude ), nodeRadius );
 }
 
-cck::NodeError cck::Globe::AddNode( const size_t &id, const cck::GeoCoord &coord, const double &nodeRadius )
+cck::NodeError cck::Globe::AddNode( const int &id, const cck::GeoCoord &coord, const double &nodeRadius )
 {
 	if ( id < 0 )
 	{
@@ -317,12 +317,12 @@ double cck::Globe::GetHeight( const cck::GeoCoord &coord ) const
 
 }
 
-size_t cck::Globe::GetNodeId( const double &latitude, const double &longitude ) const
+int cck::Globe::GetNodeId( const double &latitude, const double &longitude ) const
 {
 	return GetNodeId( cck::GeoCoord( latitude, longitude ) );
 }
 
-size_t cck::Globe::GetNodeId( const cck::GeoCoord &coord ) const
+int cck::Globe::GetNodeId( const cck::GeoCoord &coord ) const
 {
 	cck::Vec3 coordVec = coord.ToCartesian( globeRadius ).Unit();
 

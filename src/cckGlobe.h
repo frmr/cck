@@ -63,7 +63,7 @@ namespace cck
 			const shared_ptr<Edge>	edge;
 
 		public:
-			bool LinksTo( const size_t &nodeId ) const;
+			bool LinksTo( const int &nodeId ) const;
 
 		public:
 			Link( const shared_ptr<Node> &target, const shared_ptr<Edge> &edge );
@@ -82,7 +82,7 @@ namespace cck
 
 
 		public:
-			const size_t				id;
+			const int					id;
 			const cck::GeoCoord			coord;
 			const cck::Vec3				position;
 			const double				radius;
@@ -90,11 +90,11 @@ namespace cck
 		public:
 			void 						AddLink( const shared_ptr<Link> &newLink );
 			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node> &refNode );
-			shared_ptr<Link>			GetLinkTo( const size_t &targetId ) const; //TODO: Remove this?
-			bool						LinkedTo( const size_t &nodeId ) const;
+			shared_ptr<Link>			GetLinkTo( const int &targetId ) const; //TODO: Remove this?
+			bool						LinkedTo( const int &nodeId ) const;
 
 		public:
-			Node( const size_t &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius );
+			Node( const int &id, const cck::GeoCoord &coord, const Vec3 &position, const double &radius );
 		};
 
 
@@ -110,7 +110,7 @@ namespace cck
 		public:
 			bool 	Contains( const cck::Vec3 &unitVec ) const;
 			double	GetHeight( const cck::GeoCoord &coord ) const;
-			size_t	GetNodeId( const cck::GeoCoord &coord, const double &globeRadius ) const;
+			int	GetNodeId( const cck::GeoCoord &coord, const double &globeRadius ) const;
 
 
 		public:
@@ -126,15 +126,15 @@ namespace cck
 		vector<shared_ptr<Triangle>>	triangles;
 
 	public:
-		cck::LinkError	LinkNodes( const size_t &nodeIdA, const size_t &nodeIdB, const double borderScale );
-		cck::NodeError	AddNode( const size_t &id, const double &latitude, const double &longitude, const double &nodeRadius );
-		cck::NodeError	AddNode( const size_t &id, const cck::GeoCoord &coord, const double &nodeRadius );
+		cck::LinkError	LinkNodes( const int &nodeIdA, const int &nodeIdB, const double borderScale );
+		cck::NodeError	AddNode( const int &id, const double &latitude, const double &longitude, const double &nodeRadius );
+		cck::NodeError	AddNode( const int &id, const cck::GeoCoord &coord, const double &nodeRadius );
 
 		double			GetHeight( const double &latitude, const double &longitude ) const;
 		double			GetHeight( const cck::GeoCoord &coord ) const;
 
-		size_t			GetNodeId( const double &latitude, const double &longitude ) const;
-		size_t			GetNodeId( const cck::GeoCoord &coord ) const;
+		int				GetNodeId( const double &latitude, const double &longitude ) const;
+		int				GetNodeId( const cck::GeoCoord &coord ) const;
 
 
 	public:
