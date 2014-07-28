@@ -44,10 +44,17 @@ namespace cck
 
 		class Side
 		{
+		private:
+			bool formsTriangle;
+
 		public:
 			const cck::Vec3			normal;
 			const shared_ptr<Edge>	edge;
 			//TODO: Add Triangle variable, can only have one
+
+		public:
+			bool FormsTriangle() const;
+			void SetFormsTriangle();
 
 		public:
 			Side( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Edge>& edge );
@@ -114,7 +121,7 @@ namespace cck
 
 
 		public:
-			Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Edge>>& edges );
+			Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides );
 
 		};
 

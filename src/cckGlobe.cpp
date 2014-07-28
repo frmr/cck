@@ -22,8 +22,19 @@ cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& n
 {
 }
 
+bool cck::Globe::Side::FormsTriangle() const
+{
+	return formsTriangle;
+}
+
+void cck::Globe::Side::SetFormsTriangle()
+{
+	formsTriangle = true;
+}
+
 cck::Globe::Side::Side( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Edge>& edge )
-	:	normal( cck::CrossProduct( nodeA->position.Unit(), nodeB->position.Unit() ) ),
+	:	formsTriangle( false ),
+		normal( cck::CrossProduct( nodeA->position.Unit(), nodeB->position.Unit() ) ),
 		edge( edge )
 {
 }
@@ -127,27 +138,12 @@ int cck::Globe::Triangle::GetNodeId( const cck::GeoCoord& coord, const double gl
 	return closestNode;
 }
 
-cck::Globe::Triangle::Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Edge>>& edges )
+cck::Globe::Triangle::Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides )
+	: sides( sides )
 {
 	nodes.push_back( nodeA );
 	nodes.push_back( nodeB );
 	nodes.push_back( nodeC );
-
-	cck::Vec3 average = ( nodeA->position + nodeB->position + nodeC->position ) / 3.0;
-	average = average.Unit();
-
-	//dot product with each edge side
-	for ( const auto& edge : edges )
-	{
-		for ( const auto& side : edge->sides )
-		{
-			if ( DotProduct( average, side->normal ) >= 0.0 )
-			{
-				this->sides.push_back( side );
-			}
-		}
-	}
-
 }
 
 cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, const double borderScale )
@@ -205,20 +201,48 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 
 	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, borderScale ) );
 	tempEdge->AddSides();
-	nodePtrA->AddLink( std::make_shared<Link>( nodePtrB, tempEdge ) );
-	nodePtrB->AddLink( std::make_shared<Link>( nodePtrA, tempEdge ) );
-	edges.push_back( tempEdge );
 
 	vector<shared_ptr<Node>> commonNeighbors = nodePtrA->FindCommonNeighbors( nodePtrB ); //TODO: Tidy this and below loop up
 
 	for ( const auto& neighbor : commonNeighbors )
 	{
 		vector<shared_ptr<Edge>> commonEdges;
-		commonEdges.push_back( nodePtrA->GetLinkTo( nodePtrB->id )->edge );
+		//commonEdges.push_back( nodePtrA->GetLinkTo( nodePtrB->id )->edge );
+		commonEdges.push_back( tempEdge );
 		commonEdges.push_back( nodePtrB->GetLinkTo( neighbor->id )->edge );
 		commonEdges.push_back( neighbor->GetLinkTo( nodePtrA->id )->edge );
-		triangles.push_back( std::make_shared<Triangle>( nodePtrA, nodePtrB, neighbor, commonEdges ) );
+
+		cck::Vec3 average = ( nodePtrA->position + nodePtrB->position + neighbor->position ) / 3.0;
+		average = average.Unit();
+
+		vector<shared_ptr<Side>> commonSides;
+
+		//dot product with each edge side
+		for ( const auto& edge : commonEdges )
+		{
+			for ( const auto& side : edge->sides )
+			{
+				if ( DotProduct( average, side->normal ) >= 0.0 )
+				{
+					if ( side->FormsTriangle() )
+					{
+						return cck::LinkError::TRIANGLE_CONFLICT;
+					}
+					else
+					{
+						side->SetFormsTriangle();
+						commonSides.push_back( side );
+					}
+				}
+			}
+		}
+
+		triangles.push_back( std::make_shared<Triangle>( nodePtrA, nodePtrB, neighbor, commonSides ) );
 	}
+
+	nodePtrA->AddLink( std::make_shared<Link>( nodePtrB, tempEdge ) );
+	nodePtrB->AddLink( std::make_shared<Link>( nodePtrA, tempEdge ) );
+	edges.push_back( tempEdge );
 
     return cck::LinkError::SUCCESS;
 }
