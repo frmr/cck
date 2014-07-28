@@ -10,6 +10,12 @@ void cck::Globe::Edge::AddSides()
 	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
 }
 
+cck::Vec3 cck::Globe::Edge::CalculateClosestPoint( const cck::Vec3& point ) const
+{
+	//point + x * GetNormal() =
+	return point + GetNormal() * VectorDot( planeNormal, lineStart.Reverse() );
+}
+
 cck::Vec3 cck::Globe::Edge::GetNormal() const
 {
 	return (*sides.begin())->normal;
@@ -355,6 +361,16 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 			return 1.0;
 		}
 	}
+
+	for ( const auto& edge : edges )
+	{
+		if ( edge->PointOnFreeSide( coordVec ) )
+		{
+
+		}
+	}
+
+
 	return 0.0;
 
 }

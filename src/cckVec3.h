@@ -9,6 +9,7 @@ namespace cck
 		double	x, y, z;
 
 	public:
+		Vec3	Reverse() const;
 		Vec3	Unit() const;
 
 		Vec3	operator+( const Vec3& rhs ) const;

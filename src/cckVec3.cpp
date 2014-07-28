@@ -2,6 +2,11 @@
 
 #include <cmath>
 
+cck::Vec3 cck::Vec3::Reverse() const
+{
+	return cck::Vec3( -x, -y, -z );
+}
+
 cck::Vec3 cck::Vec3::Unit() const
 {
 	double length = sqrt( x * x + y * y + z * z );
