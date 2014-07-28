@@ -41,7 +41,7 @@ cck::Globe::Link::Link( const shared_ptr<Node>& target, const shared_ptr<Edge>& 
 
 bool cck::Globe::Node::LinkedTo( const int nodeId ) const
 {
-	for ( auto linkIt : links )
+	for ( const auto& linkIt : links )
 	{
 		if ( linkIt->LinksTo( nodeId ) )
 		{
@@ -55,7 +55,7 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( cons
 {
 	vector<shared_ptr<Node>> commonNeighbors;
 
-	for ( auto link : links )
+	for ( const auto& link : links )
 	{
 		if ( refNode->LinkedTo( link->target->id ) )
 		{
@@ -67,7 +67,7 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( cons
 
 shared_ptr<cck::Globe::Link> cck::Globe::Node::GetLinkTo( const int targetId ) const
 {
-	for ( auto link : links )
+	for ( const auto& link : links )
 	{
 		if ( link->target->id == targetId )
 		{
@@ -92,7 +92,7 @@ cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const Vec3& po
 
 bool cck::Globe::Triangle::Contains( const cck::Vec3& unitVec ) const
 {
-	for ( auto side : sides )
+	for ( const auto& side : sides )
 	{
 		if ( DotProduct( unitVec, side->normal ) < 0.0 )
 		{
@@ -115,7 +115,7 @@ int cck::Globe::Triangle::GetNodeId( const cck::GeoCoord& coord, const double gl
 	int closestNode = -1;
 	double closestDist = std::numeric_limits<double>::max();
 
-    for ( auto node : nodes )
+    for ( const auto& node : nodes )
 	{
 		double dist = node->radius * Distance( node->coord, coord, globeRadius );
 		if (  dist < closestDist )
@@ -137,9 +137,9 @@ cck::Globe::Triangle::Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<
 	average = average.Unit();
 
 	//dot product with each edge side
-	for ( auto edge : edges )
+	for ( const auto& edge : edges )
 	{
-		for ( auto side : edge->sides )
+		for ( const auto& side : edge->sides )
 		{
 			if ( DotProduct( average, side->normal ) >= 0.0 )
 			{
@@ -165,7 +165,7 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 	shared_ptr<Node> nodePtrA( nullptr );
 	shared_ptr<Node> nodePtrB( nullptr );
 
-	for ( auto nodeIt : nodes )
+	for ( const auto& nodeIt : nodes )
 	{
 		if ( nodePtrA == nullptr || nodePtrB == nullptr )
 		{
@@ -211,7 +211,7 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 
 	vector<shared_ptr<Node>> commonNeighbors = nodePtrA->FindCommonNeighbors( nodePtrB ); //TODO: Tidy this and below loop up
 
-	for ( auto neighbor : commonNeighbors )
+	for ( const auto& neighbor : commonNeighbors )
 	{
 		vector<shared_ptr<Edge>> commonEdges;
 		commonEdges.push_back( nodePtrA->GetLinkTo( nodePtrB->id )->edge );
@@ -235,7 +235,7 @@ cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, co
 		return cck::NodeError::NEGATIVE_ID;
 	}
 
-	for ( auto nodeIt : nodes )
+	for ( const auto& nodeIt : nodes )
 	{
 		if ( nodeIt->id == id )
 		{
@@ -306,7 +306,7 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 
 	cck::Vec3 coordVec = coord.ToCartesian( globeRadius ).Unit();
 
-	for ( auto triangle : triangles )
+	for ( const auto& triangle : triangles )
 	{
 		if ( triangle->Contains( coordVec ) )
 		{
@@ -326,7 +326,7 @@ int cck::Globe::GetNodeId( const cck::GeoCoord& coord ) const
 {
 	cck::Vec3 coordVec = coord.ToCartesian( globeRadius ).Unit();
 
-	for ( auto triangle : triangles )
+	for ( const auto& triangle : triangles )
 	{
 		if ( triangle->Contains( coordVec ) )
 		{
