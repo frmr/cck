@@ -8,27 +8,27 @@ cck::Vec3 cck::Vec3::Unit() const
 	return cck::Vec3( x / length, y / length, z / length );
 }
 
-cck::Vec3 cck::Vec3::operator+( const Vec3 &rhs ) const
+cck::Vec3 cck::Vec3::operator+( const Vec3& rhs ) const
 {
 	return cck::Vec3( x + rhs.x, y + rhs.y, z + rhs.z );
 }
 
-cck::Vec3 cck::Vec3::operator-( const Vec3 &rhs ) const
+cck::Vec3 cck::Vec3::operator-( const Vec3& rhs ) const
 {
 	return cck::Vec3( x - rhs.x, y - rhs.y, z - rhs.z );
 }
 
-cck::Vec3 cck::Vec3::operator*( const double &rhs ) const
+cck::Vec3 cck::Vec3::operator*( const double& rhs ) const
 {
 	return cck::Vec3( x * rhs, y * rhs, z * rhs );
 }
 
-cck::Vec3 cck::Vec3::operator/( const double &rhs ) const
+cck::Vec3 cck::Vec3::operator/( const double& rhs ) const
 {
 	return cck::Vec3( x / rhs, y / rhs, z / rhs );
 }
 
-cck::Vec3& cck::Vec3::operator+=( const Vec3 &rhs )
+cck::Vec3& cck::Vec3::operator+=( const Vec3& rhs )
 {
 	x += rhs.x;
 	y += rhs.y;
@@ -36,7 +36,7 @@ cck::Vec3& cck::Vec3::operator+=( const Vec3 &rhs )
 	return *this;
 }
 
-cck::Vec3& cck::Vec3::operator-=( const Vec3 &rhs )
+cck::Vec3& cck::Vec3::operator-=( const Vec3& rhs )
 {
 	x -= rhs.x;
 	y -= rhs.y;
@@ -44,7 +44,7 @@ cck::Vec3& cck::Vec3::operator-=( const Vec3 &rhs )
 	return *this;
 }
 
-cck::Vec3& cck::Vec3::operator*=( const double &rhs )
+cck::Vec3& cck::Vec3::operator*=( const double& rhs )
 {
 	x *= rhs;
 	y *= rhs;
@@ -52,7 +52,7 @@ cck::Vec3& cck::Vec3::operator*=( const double &rhs )
 	return *this;
 }
 
-cck::Vec3& cck::Vec3::operator/=( const double &rhs )
+cck::Vec3& cck::Vec3::operator/=( const double& rhs )
 {
 	x /= rhs;
 	y /= rhs;
@@ -65,7 +65,7 @@ cck::Vec3::Vec3()
 {
 }
 
-cck::Vec3::Vec3( const double &x, const double &y, const double &z )
+cck::Vec3::Vec3( const double x, const double y, const double z )
 	:	x( x ), y( y ), z( z )
 {
 }

@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-cck::Vec3 cck::GeoCoord::ToCartesian( const double &radius ) const
+cck::Vec3 cck::GeoCoord::ToCartesian( const double radius ) const
 {
 	return cck::Vec3( cos( lonRadians ), sin( lonRadians ), tan( latRadians ) ).Unit() * radius;
 }

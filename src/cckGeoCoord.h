@@ -8,7 +8,7 @@ namespace cck
 	class GeoCoord
 	{
 	public:
-		cck::Vec3 ToCartesian( const double &radius ) const;
+		cck::Vec3 ToCartesian( const double radius ) const;
 
 	public:
 		const double latDegrees;
