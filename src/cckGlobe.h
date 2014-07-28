@@ -33,7 +33,9 @@ namespace cck
 
 		public:
 			void						AddSides();
+			cck::Vec3					GetClosestPoint( const cck::Vec3& point ) const;
 			cck::Vec3					GetNormal() const;
+			bool						PointOnFreeSide( const cck::Vec3& unitVec ) const;
 
 		public:
 			Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double borderScale );

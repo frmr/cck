@@ -15,6 +15,22 @@ cck::Vec3 cck::Globe::Edge::GetNormal() const
 	return (*sides.begin())->normal;
 }
 
+bool cck::Globe::Edge::PointOnFreeSide( const cck::Vec3& unitVec ) const
+{
+	for ( const auto& side : sides )
+	{
+		if ( !side->FormsTriangle() )
+		{
+			if ( cck::DotProduct( unitVec, side->normal ) >= 0.0 )
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double borderScale )
 	:	nodeA( nodeA ),
 		nodeB( nodeB ),
@@ -199,9 +215,11 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 		return cck::LinkError::ID_NOT_FOUND;
 	}
 
+	//Create temporary edge to test new Triangles
 	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, borderScale ) );
 	tempEdge->AddSides();
 
+	//Search for common neighbors of nodeA and nodeB that form a Triangle
 	vector<shared_ptr<Node>> commonNeighbors = nodePtrA->FindCommonNeighbors( nodePtrB ); //TODO: Tidy this and below loop up
 
 	for ( const auto& neighbor : commonNeighbors )
