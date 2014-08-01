@@ -13,7 +13,7 @@ void cck::Globe::Edge::AddSides()
 cck::Vec3 cck::Globe::Edge::CalculateClosestPoint( const cck::Vec3& point ) const
 {
 	//point + x * GetNormal() =
-	return point + GetNormal() * VectorDot( planeNormal, lineStart.Reverse() );
+	//return point + GetNormal() * VectorDot( planeNormal, lineStart.Reverse() );
 }
 
 cck::Vec3 cck::Globe::Edge::GetNormal() const
