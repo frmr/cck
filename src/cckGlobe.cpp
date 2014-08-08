@@ -21,11 +21,11 @@ void cck::Globe::Edge::AddSides()
 //}
 
 
-cck::GeoCoord cck::Globe::Edge::CalculateClosestPoint( const cck::Vec3& point ) const
+cck::GeoCoord cck::Globe::Edge::ClosestPoint( const cck::Vec3& point ) const
 {
 	cck::Vec3 normal = GetNormal();
 	double multiplier = cck::DotProduct( point, normal );
-	return cck::Vec3( point - normal * multiplier ).ToGeographic();
+	return cck::Vec3( point + normal * multiplier ).ToGeographic();
 }
 
 
@@ -287,7 +287,7 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 
 cck::NodeError cck::Globe::AddNode( const int id, const double latitude, const double longitude, const double nodeRadius )
 {
-	return AddNode( id, cck::GeoCoord( latitude, longitude ), nodeRadius );
+	return AddNode( id, cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ), nodeRadius );
 }
 
 cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, const double nodeRadius )
@@ -331,7 +331,7 @@ cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, co
 
 double cck::Globe::GetHeight( const double latitude, const double longitude ) const
 {
-	return GetHeight( cck::GeoCoord( latitude, longitude ) );
+	return GetHeight( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ) );
 }
 
 double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
@@ -376,16 +376,23 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 		}
 	}
 
+	double total = 0.0;
+	int edgeCount = 0;
+
 	for ( const auto& edge : edges )
 	{
 		if ( edge->PointOnFreeSide( coordVec ) )
 		{
-
+			double dist = cck::Distance( coord, edge->ClosestPoint( coordVec ), globeRadius );
+			if ( dist < 4000.0 )
+			{
+				total += dist / 4000.0;
+				edgeCount++;
+			}
 		}
 	}
 
-
-	return 0.0;
+	return 1.0 - ( total / edgeCount );
 
 }
 

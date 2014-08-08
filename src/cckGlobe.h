@@ -33,7 +33,7 @@ namespace cck
 
 		public:
 			void						AddSides();
-			cck::GeoCoord				CalculateClosestPoint( const cck::Vec3& point ) const;
+			cck::GeoCoord				ClosestPoint( const cck::Vec3& point ) const;
 			cck::Vec3					GetNormal() const;
 			bool						PointOnFreeSide( const cck::Vec3& unitVec ) const;
 

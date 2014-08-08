@@ -3,5 +3,6 @@
 
 #include "cckGlobe.h"
 #include "cckError.h"
+#include "cckMath.h"
 
 #endif

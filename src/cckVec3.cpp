@@ -1,5 +1,6 @@
 #include "cckVec3.h"
 
+#include "cckMath.h"
 #include <cmath>
 
 cck::Vec3 cck::Vec3::Reverse() const
@@ -10,7 +11,18 @@ cck::Vec3 cck::Vec3::Reverse() const
 cck::GeoCoord cck::Vec3::ToGeographic() const
 {
 	cck::Vec3 unitVec = this->Unit();
-	//return cck::Vec3( acos( unitVec.x ), )
+	double lonRadians = atan2( unitVec.y, unitVec.x );
+
+	if ( lonRadians < -cck::halfPi )
+	{
+		lonRadians += cck::pi;
+	}
+	else if ( lonRadians > cck::halfPi )
+	{
+		lonRadians -= cck::pi;
+	}
+
+	return cck::GeoCoord( atan( unitVec.z ), lonRadians );
 }
 
 cck::Vec3 cck::Vec3::Unit() const
