@@ -10,9 +10,7 @@ cck::Vec3 cck::GeoCoord::ToCartesian( const double radius ) const
 }
 
 cck::GeoCoord::GeoCoord( const double latDegrees, const double lonDegrees )
-	:	latDegrees( latDegrees ),
-		lonDegrees( lonDegrees ),
-		latRadians( latDegrees * cck::pi / 180.0 ),
+	:	latRadians( latDegrees * cck::pi / 180.0 ),
 		lonRadians( lonDegrees * cck::pi / 180.0 )
 
 {

@@ -13,8 +13,6 @@ namespace cck
 		cck::Vec3 ToCartesian( const double radius ) const;
 
 	public:
-		const double latDegrees;
-		const double lonDegrees;
 		const double latRadians;
 		const double lonRadians;
 

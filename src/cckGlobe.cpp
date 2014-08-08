@@ -305,12 +305,12 @@ cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, co
 		}
 	}
 
-	if ( coord.latDegrees < -90.0 || coord.latDegrees > 90.0 )
+	if ( coord.latRadians < -cck::halfPi || coord.latRadians > cck::halfPi )
 	{
 		return cck::NodeError::LATITUDE_OUT_OF_RANGE;
 	}
 
-	if ( coord.lonDegrees < -180.0 || coord.lonDegrees > 180.0 )
+	if ( coord.lonRadians < -cck::pi || coord.lonRadians > cck::pi )
 	{
 		return cck::NodeError::LONGITUDE_OUT_OF_RANGE;
 	}
