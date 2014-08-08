@@ -10,11 +10,24 @@ void cck::Globe::Edge::AddSides()
 	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
 }
 
-cck::Vec3 cck::Globe::Edge::CalculateClosestPoint( const cck::Vec3& point ) const
+//cck::Vec3 cck::Globe::Edge::CalculateClosestPoint( const cck::Vec3& point ) const
+//{
+//	cck::Vec3 normal = GetNormal();
+//
+//	double multiplier = ( nodeA->unitVec.z * point.x * nodeB->unitVec.y - nodeA->unitVec.z * point.y * nodeB->unitVec.x - point.x * nodeA->unitVec.y * nodeB->unitVec.z + point.y * nodeA->unitVec.x * nodeB->unitVec.z - point.z * nodeA->unitVec.x * nodeB->unitVec.y + point.z * nodeB->unitVec.x * nodeA->unitVec.y ) /
+//						( nodeA->unitVec.z * normal.y * nodeB->unitVec.x - nodeA->unitVec.z * nodeB->unitVec.y * normal.x - normal.y * nodeA->unitVec.x * nodeB->unitVec.z + normal.z * nodeA->unitVec.x * nodeB->unitVec.y - normal.z * nodeB->unitVec.x * nodeA->unitVec.y + normal.x * nodeA->unitVec.y * nodeB->unitVec.z );
+//
+//	return cck::Vec3( point.x + multiplier * normal.x, point.y + multiplier * normal.y, point.z + multiplier * normal.z ).ToGeoCoord();
+//}
+
+
+cck::GeoCoord cck::Globe::Edge::CalculateClosestPoint( const cck::Vec3& point ) const
 {
-	//point + x * GetNormal() =
-	//return point + GetNormal() * VectorDot( planeNormal, lineStart.Reverse() );
+	cck::Vec3 normal = GetNormal();
+	double multiplier = cck::DotProduct( point, normal );
+	return cck::Vec3( point - normal * multiplier ).ToGeographic();
 }
+
 
 cck::Vec3 cck::Globe::Edge::GetNormal() const
 {
@@ -56,7 +69,7 @@ void cck::Globe::Side::SetFormsTriangle()
 
 cck::Globe::Side::Side( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Edge>& edge )
 	:	formsTriangle( false ),
-		normal( cck::CrossProduct( nodeA->position.Unit(), nodeB->position.Unit() ) ),
+		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ) ),
 		edge( edge )
 {
 }
@@ -119,6 +132,7 @@ cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const Vec3& po
 	:	id( id ),
 		coord( coord ),
 		position( position ),
+		unitVec( position.Unit() ),
 		radius( radius )
 {
 }

@@ -7,6 +7,12 @@ cck::Vec3 cck::Vec3::Reverse() const
 	return cck::Vec3( -x, -y, -z );
 }
 
+cck::GeoCoord cck::Vec3::ToGeographic() const
+{
+	cck::Vec3 unitVec = this->Unit();
+	//return cck::Vec3( acos( unitVec.x ), )
+}
+
 cck::Vec3 cck::Vec3::Unit() const
 {
 	double length = sqrt( x * x + y * y + z * z );

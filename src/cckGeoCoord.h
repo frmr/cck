@@ -5,6 +5,8 @@
 
 namespace cck
 {
+	class Vec3;
+
 	class GeoCoord
 	{
 	public:
