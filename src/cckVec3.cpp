@@ -10,19 +10,18 @@ cck::Vec3 cck::Vec3::Reverse() const
 
 cck::GeoCoord cck::Vec3::ToGeographic() const
 {
-	cck::Vec3 unitVec = this->Unit();
-	double lonRadians = atan2( unitVec.y, unitVec.x );
+	double lonRadians = atan2( y, x );
 
-	if ( lonRadians < -cck::halfPi )
+	if ( lonRadians < -cck::pi )
 	{
-		lonRadians += cck::pi;
+		lonRadians += cck::twoPi;
 	}
-	else if ( lonRadians > cck::halfPi )
+	else if ( lonRadians > cck::pi )
 	{
-		lonRadians -= cck::pi;
+		lonRadians -= cck::twoPi;
 	}
 
-	return cck::GeoCoord( atan( unitVec.z ), lonRadians );
+	return cck::GeoCoord( atan2( z, sqrt( x * x + y * y ) ), lonRadians );
 }
 
 cck::Vec3 cck::Vec3::Unit() const

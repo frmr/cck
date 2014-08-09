@@ -10,24 +10,32 @@ void cck::Globe::Edge::AddSides()
 	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
 }
 
-//cck::Vec3 cck::Globe::Edge::CalculateClosestPoint( const cck::Vec3& point ) const
-//{
-//	cck::Vec3 normal = GetNormal();
-//
-//	double multiplier = ( nodeA->unitVec.z * point.x * nodeB->unitVec.y - nodeA->unitVec.z * point.y * nodeB->unitVec.x - point.x * nodeA->unitVec.y * nodeB->unitVec.z + point.y * nodeA->unitVec.x * nodeB->unitVec.z - point.z * nodeA->unitVec.x * nodeB->unitVec.y + point.z * nodeB->unitVec.x * nodeA->unitVec.y ) /
-//						( nodeA->unitVec.z * normal.y * nodeB->unitVec.x - nodeA->unitVec.z * nodeB->unitVec.y * normal.x - normal.y * nodeA->unitVec.x * nodeB->unitVec.z + normal.z * nodeA->unitVec.x * nodeB->unitVec.y - normal.z * nodeB->unitVec.x * nodeA->unitVec.y + normal.x * nodeA->unitVec.y * nodeB->unitVec.z );
-//
-//	return cck::Vec3( point.x + multiplier * normal.x, point.y + multiplier * normal.y, point.z + multiplier * normal.z ).ToGeoCoord();
-//}
-
-
-cck::GeoCoord cck::Globe::Edge::ClosestPoint( const cck::Vec3& point ) const
+cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& point ) const
 {
 	cck::Vec3 normal = GetNormal();
-	double multiplier = cck::DotProduct( point, normal );
-	return cck::Vec3( point + normal * multiplier ).ToGeographic();
+	double multiplier = cck::DotProduct( normal, point );
+	return cck::Vec3( point - normal * multiplier );
 }
 
+bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
+{
+    double dot12 = cck::DotProduct( nodeA->unitVec, nodeB->unitVec );
+    double dot1p = cck::DotProduct( nodeA->unitVec, point );
+    double dot2p = cck::DotProduct( nodeB->unitVec, point );
+
+    double invDenom = -1.0f / ( dot12 * dot12 );
+    double u = ( dot1p - dot12 * dot2p ) * invDenom;
+    double v = ( dot2p - dot12 * dot1p ) * invDenom;
+
+	if ( u < 0.0f || v < 0.0f )
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
 
 cck::Vec3 cck::Globe::Edge::GetNormal() const
 {
@@ -336,63 +344,69 @@ double cck::Globe::GetHeight( const double latitude, const double longitude ) co
 
 double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 {
-//	vector<double> heights;
-//
-//	for ( auto nodeIt : nodes )
-//	{
-//		double dist = Distance( coord, nodeIt->coord );
-//		if ( dist < nodeIt->radius )
-//		{
-//			double prop = dist / nodeIt->radius;
-//			//height += ( 1.0 - ( prop * prop ) );
-//			//height += 1.0 - prop;
-//			heights.push_back( 1.0 - prop );
-//		}
-//	}
-//
-//	double total = 0.0;
-//
-//	for ( auto height : heights )
-//	{
-//		total += height;
-//	}
-//
-//	if ( !heights.empty() )
-//	{
-//		return total;// / heights.size();
-//	}
-//	else
-//	{
-//		return 0.0;
-//	}
-
-	cck::Vec3 coordVec = coord.ToCartesian( globeRadius ).Unit();
+	cck::Vec3 coordPoint = coord.ToCartesian( globeRadius );
+	//cck::Vec3 coordUnitVec = oord.ToCartesian( globeRadius ).Unit();
 
 	for ( const auto& triangle : triangles )
 	{
-		if ( triangle->Contains( coordVec ) )
+		if ( triangle->Contains( coordPoint ) )
 		{
-			return 1.0;
+			//return 1.0;
 		}
 	}
 
-	double total = 0.0;
-	int edgeCount = 0;
+	double mostInfluence = 0.0;
 
 	for ( const auto& edge : edges )
 	{
-		if ( edge->PointOnFreeSide( coordVec ) )
+		if ( edge->PointOnFreeSide( coordPoint ) )
 		{
-			double dist = cck::Distance( coord, edge->ClosestPoint( coordVec ), globeRadius );
-			if ( dist < 4000.0 )
+			cck::Vec3 closestPoint = edge->ClosestPoint( coordPoint.Reverse() );
+			if ( edge->Contains( closestPoint ) )
 			{
-				total += dist / 4000.0;
-				edgeCount++;
+				cck::GeoCoord closestCoord = closestPoint.Reverse().ToGeographic();
+				double dist = cck::Distance( coord, closestCoord, globeRadius );
+				if ( dist < 2000.0 )
+				{
+					double influence = 1.0 - ( dist / 2000.0 );
+					if ( influence > mostInfluence )
+					{
+						mostInfluence = influence;
+					}
+				}
 			}
 		}
 	}
 
-	return 1.0 - ( total / edgeCount );
+	if ( mostInfluence > 0.0 )
+	{
+		return mostInfluence;
+	}
+
+	for ( const auto& node : nodes )
+	{
+		double dist = cck::Distance( coord, node->coord, globeRadius );
+		if ( dist < 2000.0 )
+		{
+			return 1.0 - ( dist / 2000.0 );
+		}
+	}
+
+	return 0.0;
+
+//	int pointCount = 0;
+//
+//	for ( const auto& node : nodes )
+//	{
+//		double dist = cck::Distance( node->coord, coord, globeRadius );
+//		if ( dist < 4000.0 )
+//		{
+//			total += 1.0 - ( dist / 4000.0 );
+//			//total /= 2.0;
+//		}
+//	}
+//
+//	return total * 0.5;
 
 }
 
