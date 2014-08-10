@@ -336,14 +336,9 @@ double cck::Globe::GetHeight( const double latitude, const double longitude ) co
 	return GetHeight( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ) );
 }
 
-#include <iostream>
-
-using std::cout;
-using std::endl;
-
 double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 {
-	cck::Vec3 coordPoint = coord.ToCartesian( globeRadius );
+	const cck::Vec3 coordPoint = coord.ToCartesian( globeRadius );
 
 	for ( const auto& triangle : triangles )
 	{
@@ -355,19 +350,17 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 
 	double mostInfluence = 0.0;
 
-	//cout << edges.size() << endl;
-
 	for ( const auto& edge : edges )
 	{
 		if ( edge->PointOnFreeSide( coordPoint ) )
 		{
-			cck::Vec3 closestPoint = edge->ClosestPoint( coordPoint );
+			const cck::Vec3 closestPoint = edge->ClosestPoint( coordPoint );
 			if ( edge->Contains( closestPoint ) )
 			{
-				double dist = cck::Distance( coord, closestPoint.ToGeographic(), globeRadius );
+				const double dist = cck::Distance( coord, closestPoint.ToGeographic(), globeRadius );
 				if ( dist < 2000.0 )
 				{
-					double influence = 1.0 - ( dist / 2000.0 );
+					const double influence = 1.0 - ( dist / 2000.0 );
 					if ( influence > mostInfluence )
 					{
 						mostInfluence = influence;
@@ -377,21 +370,20 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 		}
 	}
 
-	if ( mostInfluence > 0.0 )
-	{
-		return mostInfluence;
-	}
-
 	for ( const auto& node : nodes )
 	{
-		double dist = cck::Distance( coord, node->coord, globeRadius );
+		const double dist = cck::Distance( coord, node->coord, globeRadius );
 		if ( dist < 2000.0 )
 		{
-			return 1.0 - ( dist / 2000.0 );
+			const double influence = 1.0 - ( dist / 2000.0 );
+			if ( influence > mostInfluence )
+			{
+				mostInfluence = influence;
+			}
 		}
 	}
 
-	return 0.0;
+	return mostInfluence;
 
 //	int pointCount = 0;
 //
