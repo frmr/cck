@@ -29,6 +29,7 @@ namespace cck
 			const shared_ptr<Node>		nodeA;
 			const shared_ptr<Node>		nodeB;
 			const double				borderScale;
+			cck::Vec3					normal;
 			vector<shared_ptr<Side>>	sides;
 
 		public:
@@ -36,7 +37,7 @@ namespace cck
 			cck::Vec3					ClosestPoint( const cck::Vec3& point ) const;
 			bool						Contains( const cck::Vec3& point ) const;
 			cck::Vec3					GetNormal() const;
-			bool						PointOnFreeSide( const cck::Vec3& unitVec ) const;
+			bool						PointOnFreeSide( const cck::Vec3& point ) const;
 
 		public:
 			Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double borderScale );

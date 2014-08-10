@@ -8,13 +8,13 @@ void cck::Globe::Edge::AddSides()
 {
 	sides.push_back( std::make_shared<Side>( nodeA, nodeB, shared_from_this() ) );
 	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
+	normal = (*sides.begin())->normal;
 }
 
 cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& point ) const
 {
-	cck::Vec3 normal = GetNormal();
-	double multiplier = cck::DotProduct( normal, point );
-	return cck::Vec3( point - normal * multiplier );
+	return cck::Vec3( point - normal * cck::DotProduct( normal, point ) );
+	//return (nodeA->unitVec * cck::DotProduct( nodeA->unitVec, point ) + nodeB->unitVec * cck::DotProduct( nodeB->unitVec, point )).Unit();
 }
 
 bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
@@ -23,7 +23,7 @@ bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
     double dot1p = cck::DotProduct( nodeA->unitVec, point );
     double dot2p = cck::DotProduct( nodeB->unitVec, point );
 
-    double invDenom = -1.0f / ( dot12 * dot12 );
+    double invDenom = 1.0f / ( dot12 * dot12 );
     double u = ( dot1p - dot12 * dot2p ) * invDenom;
     double v = ( dot2p - dot12 * dot1p ) * invDenom;
 
@@ -35,6 +35,21 @@ bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
 	{
 		return true;
 	}
+
+//	cck::Vec3 abVec = ( nodeB->position - nodeA->position ).Unit();
+//	cck::Vec3 baVec = ( nodeA->position - nodeB->position ).Unit();
+//
+//	cck::Vec3 apVec = ( point - nodeA->position ).Unit();
+//	cck::Vec3 bpVec = ( point - nodeB->position ).Unit();
+//
+//	if ( cck::DotProduct( abVec, apVec ) >= 0.0 && cck::DotProduct( baVec, bpVec ) >= 0.0 )
+//	{
+//		return true;
+//	}
+//	else
+//	{
+//		return false;
+//	}
 }
 
 cck::Vec3 cck::Globe::Edge::GetNormal() const
@@ -42,13 +57,13 @@ cck::Vec3 cck::Globe::Edge::GetNormal() const
 	return (*sides.begin())->normal;
 }
 
-bool cck::Globe::Edge::PointOnFreeSide( const cck::Vec3& unitVec ) const
+bool cck::Globe::Edge::PointOnFreeSide( const cck::Vec3& point ) const
 {
 	for ( const auto& side : sides )
 	{
 		if ( !side->FormsTriangle() )
 		{
-			if ( cck::DotProduct( unitVec, side->normal ) >= 0.0 )
+			if ( cck::DotProduct( point, side->normal ) >= 0.0 )
 			{
 				return true;
 			}
@@ -77,7 +92,7 @@ void cck::Globe::Side::SetFormsTriangle()
 
 cck::Globe::Side::Side( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Edge>& edge )
 	:	formsTriangle( false ),
-		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ) ),
+		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ).Unit() ),
 		edge( edge )
 {
 }
@@ -342,30 +357,35 @@ double cck::Globe::GetHeight( const double latitude, const double longitude ) co
 	return GetHeight( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ) );
 }
 
+#include <iostream>
+
+using std::cout;
+using std::endl;
+
 double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 {
 	cck::Vec3 coordPoint = coord.ToCartesian( globeRadius );
-	//cck::Vec3 coordUnitVec = oord.ToCartesian( globeRadius ).Unit();
 
 	for ( const auto& triangle : triangles )
 	{
 		if ( triangle->Contains( coordPoint ) )
 		{
-			//return 1.0;
+			return 1.0;
 		}
 	}
 
 	double mostInfluence = 0.0;
 
+	//cout << edges.size() << endl;
+
 	for ( const auto& edge : edges )
 	{
 		if ( edge->PointOnFreeSide( coordPoint ) )
 		{
-			cck::Vec3 closestPoint = edge->ClosestPoint( coordPoint.Reverse() );
+			cck::Vec3 closestPoint = edge->ClosestPoint( coordPoint );
 			if ( edge->Contains( closestPoint ) )
 			{
-				cck::GeoCoord closestCoord = closestPoint.Reverse().ToGeographic();
-				double dist = cck::Distance( coord, closestCoord, globeRadius );
+				double dist = cck::Distance( coord, closestPoint.ToGeographic(), globeRadius );
 				if ( dist < 2000.0 )
 				{
 					double influence = 1.0 - ( dist / 2000.0 );
