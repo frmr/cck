@@ -14,7 +14,6 @@ void cck::Globe::Edge::AddSides()
 cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& point ) const
 {
 	return cck::Vec3( point - normal * cck::DotProduct( normal, point ) );
-	//return (nodeA->unitVec * cck::DotProduct( nodeA->unitVec, point ) + nodeB->unitVec * cck::DotProduct( nodeB->unitVec, point )).Unit();
 }
 
 bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
@@ -23,11 +22,11 @@ bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
     double dot1p = cck::DotProduct( nodeA->unitVec, point );
     double dot2p = cck::DotProduct( nodeB->unitVec, point );
 
-    double invDenom = 1.0f / ( dot12 * dot12 );
+    double invDenom = 1.0 / ( dot12 * dot12 );
     double u = ( dot1p - dot12 * dot2p ) * invDenom;
     double v = ( dot2p - dot12 * dot1p ) * invDenom;
 
-	if ( u < 0.0f || v < 0.0f )
+	if ( u < 0.0 || v < 0.0 )
 	{
 		return false;
 	}
@@ -35,26 +34,6 @@ bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
 	{
 		return true;
 	}
-
-//	cck::Vec3 abVec = ( nodeB->position - nodeA->position ).Unit();
-//	cck::Vec3 baVec = ( nodeA->position - nodeB->position ).Unit();
-//
-//	cck::Vec3 apVec = ( point - nodeA->position ).Unit();
-//	cck::Vec3 bpVec = ( point - nodeB->position ).Unit();
-//
-//	if ( cck::DotProduct( abVec, apVec ) >= 0.0 && cck::DotProduct( baVec, bpVec ) >= 0.0 )
-//	{
-//		return true;
-//	}
-//	else
-//	{
-//		return false;
-//	}
-}
-
-cck::Vec3 cck::Globe::Edge::GetNormal() const
-{
-	return (*sides.begin())->normal;
 }
 
 bool cck::Globe::Edge::PointOnFreeSide( const cck::Vec3& point ) const
