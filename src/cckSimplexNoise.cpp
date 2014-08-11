@@ -161,17 +161,20 @@ double cck::SimplexNoise::OctaveNoise( const double x, const double y, const dou
     return total / maxAmplitude;
 }
 
-double cck::SimplexNoise::ScaledOctaveNoise( const double x, const double y, const double z, const int octaves, const double persistence, const double frequency, const double loBound, const double hiBound ) const
+double cck::SimplexNoise::ScaledOctaveNoise( const double x, const double y, const double z, const int octaves, const double persistence, const double frequency, const double boundMin, const double boundMax ) const
 {
-	return OctaveNoise( x, y, z, octaves, persistence, frequency ) * ( hiBound - loBound ) / 2.0 + ( hiBound + loBound ) / 2.0;
+	return OctaveNoise( x, y, z, octaves, persistence, frequency ) * ( boundMax - boundMin ) / 2.0 + ( boundMax + boundMin ) / 2.0;
 }
 
 cck::SimplexNoise::SimplexNoise( const unsigned int seed )
+	:	grad3{	{ 1.0, 1.0, 0.0 }, { -1.0, 1.0, 0.0 }, { 1.0, -1.0, 0.0},	{ -1.0, -1.0, 0.0 },
+				{ 1.0, 0.0, 1.0 }, { -1.0, 0.0, 1.0 }, { 1.0, 0.0, -1.0 },	{ -1.0, 0.0, -1.0 },
+				{ 0.0, 1.0, 1.0 }, { 0.0, -1.0, 1.0 }, { 0.0, 1.0, -1.0 },	{ 0.0, -1.0, -1.0 }	}
 {
 	srand( seed );
 
 	for ( int i = 0; i < 512; i++ )
 	{
-		perm[i] = rand() % 256;
+		perm[i] = ( rand() % 256 ) & 255;
 	}
 }

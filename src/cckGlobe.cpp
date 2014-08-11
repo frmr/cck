@@ -340,50 +340,58 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 {
 	const cck::Vec3 coordPoint = coord.ToCartesian( globeRadius );
 
+	double mostInfluence = 0.0;
+	bool inTriangle = false;
+
 	for ( const auto& triangle : triangles )
 	{
 		if ( triangle->Contains( coordPoint ) )
 		{
-			return 1.0;
+			mostInfluence = 1.0;
+			inTriangle = true;
+			break;
 		}
 	}
 
-	double mostInfluence = 0.0;
-
-	for ( const auto& edge : edges )
+	if ( !inTriangle )
 	{
-		if ( edge->PointOnFreeSide( coordPoint ) )
+		for ( const auto& edge : edges )
 		{
-			const cck::Vec3 closestPoint = edge->ClosestPoint( coordPoint );
-			if ( edge->Contains( closestPoint ) )
+			if ( edge->PointOnFreeSide( coordPoint ) )
 			{
-				const double dist = cck::Distance( coord, closestPoint.ToGeographic(), globeRadius );
-				if ( dist < 2000.0 )
+				const cck::Vec3 closestPoint = edge->ClosestPoint( coordPoint );
+				if ( edge->Contains( closestPoint ) )
 				{
-					const double influence = 1.0 - ( dist / 2000.0 );
-					if ( influence > mostInfluence )
+					const double dist = cck::Distance( coord, closestPoint.ToGeographic(), globeRadius );
+					if ( dist < 2000.0 )
 					{
-						mostInfluence = influence;
+						const double influence = 1.0 - ( dist / 2000.0 );
+						if ( influence > mostInfluence )
+						{
+							mostInfluence = influence;
+						}
 					}
+				}
+			}
+		}
+
+		for ( const auto& node : nodes )
+		{
+			const double dist = cck::Distance( coord, node->coord, globeRadius );
+			if ( dist < 2000.0 )
+			{
+				const double influence = 1.0 - ( dist / 2000.0 );
+				if ( influence > mostInfluence )
+				{
+					mostInfluence = influence;
 				}
 			}
 		}
 	}
 
-	for ( const auto& node : nodes )
-	{
-		const double dist = cck::Distance( coord, node->coord, globeRadius );
-		if ( dist < 2000.0 )
-		{
-			const double influence = 1.0 - ( dist / 2000.0 );
-			if ( influence > mostInfluence )
-			{
-				mostInfluence = influence;
-			}
-		}
-	}
+	mostInfluence = 1.0;
 
-	return mostInfluence;
+	return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 4, 0.5, 0.0003, 0.0, 1.0 ) >= 0.5 ) ? 1.0 : 0.0;
 }
 
 int cck::Globe::GetNodeId( const double latitude, const double longitude ) const
@@ -405,7 +413,8 @@ int cck::Globe::GetNodeId( const cck::GeoCoord& coord ) const
 	return -1;
 }
 
-cck::Globe::Globe( const int seed, const double globeRadius )
-	:	globeRadius( globeRadius )
+cck::Globe::Globe( const double globeRadius, const unsigned int seed )
+	:	globeRadius( globeRadius ),
+		simplex( seed )
 {
 }

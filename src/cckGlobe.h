@@ -7,6 +7,7 @@
 #include "cckGeoCoord.h"
 #include "cckError.h"
 #include "cckVec3.h"
+#include "cckSimplexNoise.h"
 
 using std::shared_ptr;
 using std::vector;
@@ -135,6 +136,7 @@ namespace cck
 		vector<shared_ptr<Node>>		nodes;
 		vector<shared_ptr<Edge>>		edges;
 		vector<shared_ptr<Triangle>>	triangles;
+		const cck::SimplexNoise			simplex;
 
 	public:
 		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double borderScale );
@@ -149,7 +151,7 @@ namespace cck
 
 
 	public:
-		Globe( const int seed, const double radius );
+		Globe( const double radius, const unsigned int seed );
 	};
 }
 #endif // CCK_GLOBE_H
