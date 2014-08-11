@@ -17,7 +17,7 @@ namespace cck
 		const double	lonRadians;
 
 	public:
-		GeoCoord( const double latDegrees, const double lonDegrees );
+		GeoCoord( const double latRadians, const double lonRadians );
 	};
 }
 

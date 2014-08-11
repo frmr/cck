@@ -384,21 +384,6 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 	}
 
 	return mostInfluence;
-
-//	int pointCount = 0;
-//
-//	for ( const auto& node : nodes )
-//	{
-//		double dist = cck::Distance( node->coord, coord, globeRadius );
-//		if ( dist < 4000.0 )
-//		{
-//			total += 1.0 - ( dist / 4000.0 );
-//			//total /= 2.0;
-//		}
-//	}
-//
-//	return total * 0.5;
-
 }
 
 int cck::Globe::GetNodeId( const double latitude, const double longitude ) const
@@ -423,5 +408,4 @@ int cck::Globe::GetNodeId( const cck::GeoCoord& coord ) const
 cck::Globe::Globe( const int seed, const double globeRadius )
 	:	globeRadius( globeRadius )
 {
-
 }

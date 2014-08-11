@@ -41,6 +41,8 @@
 		<Unit filename="cckGlobe.h" />
 		<Unit filename="cckMath.cpp" />
 		<Unit filename="cckMath.h" />
+		<Unit filename="cckSimplexNoise.cpp" />
+		<Unit filename="cckSimplexNoise.h" />
 		<Unit filename="cckVec3.cpp" />
 		<Unit filename="cckVec3.h" />
 		<Unit filename="main.cpp" />
