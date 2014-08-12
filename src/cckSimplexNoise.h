@@ -10,7 +10,7 @@ namespace cck
 		int perm[512];
 
 	private:
-		double Dot( const double g[], const double x, const double y, const double z ) const;
+		double Dot( const double* g, const double x, const double y, const double z ) const;
 
 	public:
 		double	Noise( const double x, const double y, const double z ) const;

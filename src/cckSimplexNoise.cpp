@@ -1,9 +1,9 @@
 #include "cckSimplexNoise.h"
 
 #include <cmath>
-#include "stdlib.h"
+#include <cstdlib>
 
-double cck::SimplexNoise::Dot( const double g[], const double x, const double y, const double z ) const
+double cck::SimplexNoise::Dot( const double* g, const double x, const double y, const double z ) const
 {
 	return g[0] * x + g[1] * y + g[2] * z;
 }
@@ -173,8 +173,9 @@ cck::SimplexNoise::SimplexNoise( const unsigned int seed )
 {
 	srand( seed );
 
-	for ( int i = 0; i < 512; i++ )
+	for ( int i = 0; i < 256; i++ )
 	{
 		perm[i] = ( rand() % 256 ) & 255;
+		perm[i+256] = perm[i];
 	}
 }

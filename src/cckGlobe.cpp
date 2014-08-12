@@ -338,7 +338,7 @@ double cck::Globe::GetHeight( const double latitude, const double longitude ) co
 
 double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 {
-	const cck::Vec3 coordPoint = coord.ToCartesian( globeRadius );
+	cck::Vec3 coordPoint = coord.ToCartesian( globeRadius );
 
 	double mostInfluence = 0.0;
 	bool inTriangle = false;
@@ -389,9 +389,12 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 		}
 	}
 
-	mostInfluence = 1.0;
+	//mostInfluence = 1.0;
 
-	return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 4, 0.5, 0.0003, 0.0, 1.0 ) >= 0.5 ) ? 1.0 : 0.0;
+	//coordPoint = coordPoint.Unit() * 256;
+
+	//return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 4, 0.8, 0.005, 0.0, 1.0 ) >= 0.5 ) ? 1.0 : 0.0;
+	return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 8, 0.5, 0.0005, 0.0, 1.0 ) >= 0.2 ) ? 1.0 : 0.0;
 }
 
 int cck::Globe::GetNodeId( const double latitude, const double longitude ) const
