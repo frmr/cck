@@ -394,7 +394,18 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 	//coordPoint = coordPoint.Unit() * 256;
 
 	//return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 4, 0.8, 0.005, 0.0, 1.0 ) >= 0.5 ) ? 1.0 : 0.0;
-	return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 8, 0.5, 0.0005, 0.0, 1.0 ) >= 0.2 ) ? 1.0 : 0.0;
+	//return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 7, 0.6, 0.0001, 0.0, 1.0 ) >= 0.4 ) ? 1.0 : 0.0;
+
+	//return mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 7, 0.6, 0.0001, 0.0, 1.0 ) >= 0.4 ? 1.0 : 0.0;
+
+	mostInfluence *= simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 7, 0.6, 0.0001, 0.0, 1.0 );
+
+	if ( mostInfluence >= 0.4 )
+	{
+		//return mostInfluence - 0.4;
+		return ( mostInfluence - 0.4 ) / 0.6;
+	}
+	//if influence > 0.4, scale influence * simplex to range [0,1]
 }
 
 int cck::Globe::GetNodeId( const double latitude, const double longitude ) const
