@@ -36,6 +36,7 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="cck.h" />
+		<Unit filename="cckData.h" />
 		<Unit filename="cckError.h" />
 		<Unit filename="cckGeoCoord.cpp" />
 		<Unit filename="cckGeoCoord.h" />

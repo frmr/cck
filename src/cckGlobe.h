@@ -4,10 +4,11 @@
 #include <memory>
 #include <vector>
 
-#include "cckGeoCoord.h"
+#include "cckData.h"
 #include "cckError.h"
-#include "cckVec3.h"
+#include "cckGeoCoord.h"
 #include "cckSimplexNoise.h"
+#include "cckVec3.h"
 
 using std::shared_ptr;
 using std::vector;
@@ -149,6 +150,8 @@ namespace cck
 		int				GetNodeId( const double latitude, const double longitude ) const;
 		int				GetNodeId( const cck::GeoCoord& coord ) const;
 
+		cck::Data		GetData( const double latitude, const double longitude ) const;
+		cck::Data		GetData( const cck::GeoCoord& coord ) const;
 
 	public:
 		Globe( const double radius, const unsigned int seed );

@@ -409,7 +409,7 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 
 int cck::Globe::GetNodeId( const double latitude, const double longitude ) const
 {
-	return GetNodeId( cck::GeoCoord( latitude, longitude ) );
+	return GetNodeId( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ) );
 }
 
 int cck::Globe::GetNodeId( const cck::GeoCoord& coord ) const
@@ -424,6 +424,19 @@ int cck::Globe::GetNodeId( const cck::GeoCoord& coord ) const
 		}
 	}
 	return -1;
+}
+
+cck::Data cck::Globe::GetData( const double latitude, const double longitude ) const
+{
+	return GetData( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ) );
+}
+
+cck::Data cck::Globe::GetData( const cck::GeoCoord& coord ) const
+{
+	cck::Data output;
+	output.height = GetHeight( coord );
+	output.id = output.height > 0.0 ? 1 : -1;
+	return output;
 }
 
 cck::Globe::Globe( const double globeRadius, const unsigned int seed )

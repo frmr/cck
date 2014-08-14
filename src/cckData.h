@@ -3,14 +3,10 @@
 
 namespace cck
 {
-	class Data
+	struct Data
 	{
-		public:
-			int		id;
-			double	height;
-
-		public:
-			Data( const int id, const double height );
+		int		id;
+		double	height;
 	};
 }
 
