@@ -151,7 +151,7 @@ bool cck::Globe::Triangle::Contains( const cck::Vec3& unitVec ) const
 	return true;
 }
 
-double	cck::Globe::Triangle::GetHeight( const cck::GeoCoord& coord ) const
+double	cck::Globe::Triangle::double GetData( const cck::GeoCoord& coord, double& height, int& id ) const
 {
 	//dist to each node
 	//save in map
@@ -384,22 +384,12 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 		}
 	}
 
-	//mostInfluence = 1.0;
-
-	//coordPoint = coordPoint.Unit() * 256;
-
-	//return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 4, 0.8, 0.005, 0.0, 1.0 ) >= 0.5 ) ? 1.0 : 0.0;
-	//return ( mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 7, 0.6, 0.0001, 0.0, 1.0 ) >= 0.4 ) ? 1.0 : 0.0;
-
-	//return mostInfluence * simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 7, 0.6, 0.0001, 0.0, 1.0 ) >= 0.4 ? 1.0 : 0.0;
-
 	mostInfluence *= simplex.ScaledOctaveNoise( coordPoint.x, coordPoint.y, coordPoint.z, 7, 0.6, 0.0001, 0.0, 1.0 );
 
 	if ( mostInfluence >= 0.4 )
 	{
 		return ( mostInfluence - 0.4 ) / 0.6;
 	}
-	//if influence > 0.4, scale influence * simplex to range [0,1]
 }
 
 int cck::Globe::GetNodeId( const cck::GeoCoord& coord ) const
@@ -416,17 +406,39 @@ int cck::Globe::GetNodeId( const cck::GeoCoord& coord ) const
 	return -1;
 }
 
-cck::Data cck::Globe::GetData( const double latitude, const double longitude ) const
+void cck::Globe::GetData( const double latitude, const double longitude, double& height, int& id ) const
 {
-	return GetData( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ) );
+	GetData( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ), height, id );
 }
 
-cck::Data cck::Globe::GetData( const cck::GeoCoord& coord ) const
+void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) const
 {
-	cck::Data output;
-	output.height = GetHeight( coord );
-	output.id = output.height > 0.0 ? 1 : -1;
-	return output;
+	height = GetHeight( coord );
+	id = height > 0.0 ? 1 : -1;
+
+	cck::Vec3 point = coord.ToCartesian( globeRadius );
+
+	for ( const auto& triangle : triangles )
+	{
+		if ( triangle->Contains( point ) )
+		{
+			triangle->GetData( coord, height, id );
+			return;
+		}
+	}
+
+	double mostInfluence = 0.0;
+	for ( const auto& edge : edges )
+	{
+		if ( edge->OnFreeSide( point ) )
+		{
+			double influence = edge->GetInfluence( point );
+			if ( influence > mostInfluence )
+			{
+				mostInfluence = influence;
+			}
+		}
+	}
 }
 
 cck::Globe::Globe( const double globeRadius, const unsigned int seed )

@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include "cckData.h"
 #include "cckError.h"
 #include "cckGeoCoord.h"
 #include "cckSimplexNoise.h"
@@ -122,7 +121,7 @@ namespace cck
 
 		public:
 			bool 	Contains( const cck::Vec3& unitVec ) const;
-			double	GetHeight( const cck::GeoCoord& coord ) const;
+			double	GetData( const cck::GeoCoord& coord, double& height, int& id ) const;
 			int		GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const;
 
 
@@ -148,8 +147,8 @@ namespace cck
 		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double nodeRadius );
 		cck::NodeError	AddNode( const int id, const cck::GeoCoord& coord, const double nodeRadius );
 
-		cck::Data		GetData( const double latitude, const double longitude ) const;
-		cck::Data		GetData( const cck::GeoCoord& coord ) const;
+		void			GetData( const double latitude, const double longitude, double& height, int& id ) const;
+		void			GetData( const cck::GeoCoord& coord, double& height, int& id ) const;
 
 	public:
 		Globe( const double radius, const unsigned int seed );
