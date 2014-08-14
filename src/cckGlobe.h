@@ -139,16 +139,14 @@ namespace cck
 		vector<shared_ptr<Triangle>>	triangles;
 		const cck::SimplexNoise			simplex;
 
+	private:
+		double			GetHeight( const cck::GeoCoord& coord ) const;
+		int				GetNodeId( const cck::GeoCoord& coord ) const;
+
 	public:
 		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double borderScale );
 		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double nodeRadius );
 		cck::NodeError	AddNode( const int id, const cck::GeoCoord& coord, const double nodeRadius );
-
-		double			GetHeight( const double latitude, const double longitude ) const;
-		double			GetHeight( const cck::GeoCoord& coord ) const;
-
-		int				GetNodeId( const double latitude, const double longitude ) const;
-		int				GetNodeId( const cck::GeoCoord& coord ) const;
 
 		cck::Data		GetData( const double latitude, const double longitude ) const;
 		cck::Data		GetData( const cck::GeoCoord& coord ) const;

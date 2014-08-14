@@ -331,11 +331,6 @@ cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, co
 	return cck::NodeError::SUCCESS;
 }
 
-double cck::Globe::GetHeight( const double latitude, const double longitude ) const
-{
-	return GetHeight( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ) );
-}
-
 double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 {
 	cck::Vec3 coordPoint = coord.ToCartesian( globeRadius );
@@ -405,11 +400,6 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 		return ( mostInfluence - 0.4 ) / 0.6;
 	}
 	//if influence > 0.4, scale influence * simplex to range [0,1]
-}
-
-int cck::Globe::GetNodeId( const double latitude, const double longitude ) const
-{
-	return GetNodeId( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ) );
 }
 
 int cck::Globe::GetNodeId( const cck::GeoCoord& coord ) const
