@@ -402,7 +402,6 @@ double cck::Globe::GetHeight( const cck::GeoCoord& coord ) const
 
 	if ( mostInfluence >= 0.4 )
 	{
-		//return mostInfluence - 0.4;
 		return ( mostInfluence - 0.4 ) / 0.6;
 	}
 	//if influence > 0.4, scale influence * simplex to range [0,1]
