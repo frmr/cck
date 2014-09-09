@@ -76,9 +76,8 @@ void cck::Globe::Edge::GetData( const cck::GeoCoord& coord, const cck::Vec3& poi
 
 double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const
 {
-	//closestPoint
 	const cck::Vec3 closest = ClosestPoint( point.Unit() );
-	//contains
+
 	if ( Contains( closest ) )
 	{
 		const cck::GeoCoord closestCoord = closest.ToGeographic();
@@ -90,7 +89,6 @@ double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& coord, const cck::Ve
 	{
 		return 0.0;
 	}
-
 }
 
 cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double borderScale, const double globeRadius )
@@ -491,53 +489,71 @@ void cck::Globe::GetData( const double latitude, const double longitude, double&
 void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) const
 {
 	cck::Vec3 point = coord.ToCartesian( globeRadius );
+
 	height = std::numeric_limits<double>::min();
-	//height = 0.0;
 	id = -1;
+
+	bool inTriangle = false;
 
 	for ( const auto& triangle : triangles )
 	{
 		triangle->GetData( coord, point, globeRadius, height, id );
 		if ( height > std::numeric_limits<double>::min() )
 		{
-			return;
+			inTriangle = true;
 		}
 	}
 
-	double highestHeight = std::numeric_limits<double>::min();
-	int	highestId = -1;
-
-	for ( const auto& edge : edges )
+	if ( !inTriangle )
 	{
-		double tempHeight = std::numeric_limits<double>::min();
-		int tempId = -1;
+		double highestHeight = std::numeric_limits<double>::min();
+		int	highestId = -1;
 
-		edge->GetData( coord, point, globeRadius, tempHeight, tempId );
-
-		if ( tempHeight > highestHeight )
+		for ( const auto& edge : edges )
 		{
-			highestHeight = tempHeight;
-			highestId = tempId;
+			double tempHeight = std::numeric_limits<double>::min();
+			int tempId = -1;
+
+			edge->GetData( coord, point, globeRadius, tempHeight, tempId );
+
+			if ( tempHeight > highestHeight )
+			{
+				highestHeight = tempHeight;
+				highestId = tempId;
+			}
 		}
+
+
+		for ( const auto& node : nodes )
+		{
+			double tempHeight = std::numeric_limits<double>::min();
+			int tempId = -1;
+
+			node->GetData( coord, globeRadius, tempHeight, tempId );
+
+			if ( tempHeight > highestHeight )
+			{
+				highestHeight = tempHeight;
+				highestId = tempId;
+			}
+		}
+
+		height = highestHeight;
+		id = highestId;
 	}
 
+	if ( height < 0.0 ) height = 0.0;
 
-	for ( const auto& node : nodes )
+	height *= simplex.ScaledOctaveNoise( point.x, point.y, point.z, 7, 0.6, 0.0001, 0.0, 1.0 );
+
+	if ( height >= 0.4 )
 	{
-		double tempHeight = std::numeric_limits<double>::min();
-		int tempId = -1;
-
-		node->GetData( coord, globeRadius, tempHeight, tempId );
-
-		if ( tempHeight > highestHeight )
-		{
-			highestHeight = tempHeight;
-			highestId = tempId;
-		}
+		height = ( height - 0.4 ) / 0.6;
 	}
-
-	height = highestHeight;
-	id = highestId;
+	else
+	{
+		height = 0.0;
+	}
 }
 
 cck::Globe::Globe( const double globeRadius, const unsigned int seed )
