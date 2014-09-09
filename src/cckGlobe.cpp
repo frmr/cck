@@ -55,27 +55,29 @@ void cck::Globe::Edge::AddSides()
 
 void cck::Globe::Edge::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
 {
-	const cck::Vec3 closest = ClosestPoint( point );
-	if ( Contains( closest ) )
+	if ( PointOnFreeSide( point ) )
 	{
-		const cck::GeoCoord closestCoord = closest.ToGeographic();
-		const double maxDist = nodeA->radius + ( nodeB->radius - nodeA->radius ) * cck::Distance( nodeA->coord, closestCoord, globeRadius ) / length;
-		const double distance = cck::Distance( coord, closestCoord, globeRadius );
-		if ( distance <= maxDist )
+		const cck::Vec3 closest = ClosestPoint( point );
+
+		if ( Contains( closest ) )
 		{
-			const double influence = distance / maxDist;
-			height = influence;
-			id = 1;
-			return;
+			const cck::GeoCoord closestCoord = closest.ToGeographic();
+			const double maxDist = nodeA->radius + ( nodeB->radius - nodeA->radius ) * cck::Distance( nodeA->coord, closestCoord, globeRadius ) / length;
+			const double distance = cck::Distance( coord, closestCoord, globeRadius );
+			if ( distance < maxDist )
+			{
+				const double influence = 1.0 - ( distance / maxDist );
+				height = influence;
+				id = 1;
+			}
 		}
 	}
-
 }
 
 double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const
 {
 	//closestPoint
-	const cck::Vec3 closest = ClosestPoint( point );
+	const cck::Vec3 closest = ClosestPoint( point.Unit() );
 	//contains
 	if ( Contains( closest ) )
 	{
@@ -157,9 +159,10 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( cons
 
 void cck::Globe::Node::GetData( const cck::GeoCoord &pointCoord, const double globeRadius, double& height, int& id ) const
 {
-	if ( cck::Distance( coord, pointCoord, globeRadius ) < radius )
+	const double distance = cck::Distance( coord, pointCoord, globeRadius );
+	if ( distance < radius )
 	{
-		height = 1.0;
+		height = 1.0 - distance / radius;
 		id = 1;
 	}
 }
@@ -488,25 +491,26 @@ void cck::Globe::GetData( const double latitude, const double longitude, double&
 void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) const
 {
 	cck::Vec3 point = coord.ToCartesian( globeRadius );
-	height = 0.0;
-	height = -1;
+	height = std::numeric_limits<double>::min();
+	//height = 0.0;
+	id = -1;
 
 	for ( const auto& triangle : triangles )
 	{
 		triangle->GetData( coord, point, globeRadius, height, id );
-		if ( height > 0.0 )
+		if ( height > std::numeric_limits<double>::min() )
 		{
 			return;
 		}
 	}
 
-	double highestHeight = 0.0;
+	double highestHeight = std::numeric_limits<double>::min();
 	int	highestId = -1;
 
 	for ( const auto& edge : edges )
 	{
-		double tempHeight;
-		int tempId;
+		double tempHeight = std::numeric_limits<double>::min();
+		int tempId = -1;
 
 		edge->GetData( coord, point, globeRadius, tempHeight, tempId );
 
@@ -520,8 +524,8 @@ void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) 
 
 	for ( const auto& node : nodes )
 	{
-		double tempHeight;
-		int tempId;
+		double tempHeight = std::numeric_limits<double>::min();
+		int tempId = -1;
 
 		node->GetData( coord, globeRadius, tempHeight, tempId );
 
@@ -532,8 +536,8 @@ void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) 
 		}
 	}
 
-	//height = highestHeight;
-	//id = highestId;
+	height = highestHeight;
+	id = highestId;
 }
 
 cck::Globe::Globe( const double globeRadius, const unsigned int seed )
