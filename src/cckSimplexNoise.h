@@ -1,6 +1,8 @@
 #ifndef CCK_SIMPLEX_NOISE_H
 #define CCK_SIMPLEX_NOISE_H
 
+//TODO: Acknowledge source
+
 namespace cck
 {
 	class SimplexNoise

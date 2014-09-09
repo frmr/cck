@@ -30,17 +30,23 @@ namespace cck
 			const shared_ptr<Node>		nodeA;
 			const shared_ptr<Node>		nodeB;
 			const double				borderScale;
+			const double				length;
+			cck::Vec3					midpoint;
 			cck::Vec3					normal;
 			vector<shared_ptr<Side>>	sides;
 
-		public:
-			void						AddSides();
+		private:
 			cck::Vec3					ClosestPoint( const cck::Vec3& point ) const;
 			bool						Contains( const cck::Vec3& point ) const;
 			bool						PointOnFreeSide( const cck::Vec3& point ) const;
 
 		public:
-			Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double borderScale );
+			void						AddSides();
+			void						GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+			double						GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const;
+
+		public:
+			Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double borderScale, const double globeRadius );
 		};
 
 
@@ -102,6 +108,7 @@ namespace cck
 		public:
 			void 						AddLink( const shared_ptr<Link>& newLink );
 			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node>& refNode );
+			void						GetData( const cck::GeoCoord &pointCoord, const double globeRadius, double& height, int& id ) const;
 			shared_ptr<Link>			GetLinkTo( const int targetId ) const; //TODO: Remove this?
 			bool						LinkedTo( const int nodeId ) const;
 
@@ -115,13 +122,16 @@ namespace cck
 		class Triangle
 		{
 		private:
+			cck::Vec3					midpoint;
 			vector<shared_ptr<Node>>	nodes;
 			vector<shared_ptr<Side>>	sides;
 			//TODO: Bounding box class
 
+		private:
+			bool 	Contains( const cck::Vec3& point ) const;
+
 		public:
-			bool 	Contains( const cck::Vec3& unitVec ) const;
-			double	GetData( const cck::GeoCoord& coord, double& height, int& id ) const;
+			void	GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
 			int		GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const;
 
 
@@ -139,13 +149,14 @@ namespace cck
 		const cck::SimplexNoise			simplex;
 
 	private:
-		double			GetHeight( const cck::GeoCoord& coord ) const;
+		void			GetHeight( const cck::GeoCoord& coord, double& height ) const;
 		int				GetNodeId( const cck::GeoCoord& coord ) const;
 
 	public:
-		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double borderScale );
 		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double nodeRadius );
 		cck::NodeError	AddNode( const int id, const cck::GeoCoord& coord, const double nodeRadius );
+
+		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double borderScale );
 
 		void			GetData( const double latitude, const double longitude, double& height, int& id ) const;
 		void			GetData( const cck::GeoCoord& coord, double& height, int& id ) const;
