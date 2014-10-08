@@ -23,17 +23,15 @@ namespace cck
 
 
 
-
 		class Edge: public std::enable_shared_from_this<Edge>
 		{
 		public:
 			const shared_ptr<Node>		nodeA;
 			const shared_ptr<Node>		nodeB;
-			const double				borderScale;
 			const double				length;
-			cck::Vec3					midpoint;
-			cck::Vec3					normal;
-			vector<shared_ptr<Side>>	sides;
+			const shared_ptr<Node>		centerNode; //nullptr if a mountain Edge
+			const cck::Vec3				normal;
+			vector<shared_ptr<Side>>	sides; //this should probably be private
 
 		private:
 			cck::Vec3					ClosestPoint( const cck::Vec3& point ) const;
@@ -42,12 +40,15 @@ namespace cck
 
 		public:
 			void						AddSides();
-			void						GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
-			double						GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const;
+			void						GetContinentData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+			void 						GetMountainData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+			//double						GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const; //remove
 
 		public:
-			Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double borderScale, const double globeRadius );
+			Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius );
+			Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double globeRadius );
 		};
+
 
 
 
@@ -95,26 +96,26 @@ namespace cck
 			vector<shared_ptr<Link>>	links;
 
 		public:
-
-
-
-		public:
 			const int					id;
 			const cck::GeoCoord			coord;
 			const cck::Vec3				position;
 			const cck::Vec3				unitVec;
+			const double				height;
 			const double				radius;
+			const double				plateau;
 
 		public:
 			void 						AddLink( const shared_ptr<Link>& newLink );
 			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node>& refNode );
-			void						GetData( const cck::GeoCoord &pointCoord, const double globeRadius, double& height, int& id ) const;
-			shared_ptr<Link>			GetLinkTo( const int targetId ) const; //TODO: Remove this?
+			void						GetData( const cck::GeoCoord &pointCoord, const double globeRadius, double& sampleHeight, int& sampleId ) const;
+			shared_ptr<Link>			GetLinkTo( const int targetId ) const;
 			bool						LinkedTo( const int nodeId ) const;
 
 		public:
-			Node( const int id, const cck::GeoCoord& coord, const Vec3& position, const double radius );
+			Node( const int id, const cck::GeoCoord& coord, const double globeRadius, const double height, const double radius );			//Node for continent definitions
+			Node( const cck::GeoCoord& coord, const double globeRadius, const double height, const double radius, const double plateau );	//Node for mountain definitions
 		};
+
 
 
 
@@ -132,13 +133,32 @@ namespace cck
 
 		public:
 			void	GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
-			int		GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const;
+			//int		GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const;
 
 
 		public:
 			Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides );
 
 		};
+
+
+
+
+		class Section
+		{
+		private:
+			const shared_ptr<Node>				baseNode;
+			const vector<shared_ptr<Node>>		mountainNodes;
+			const vector<shared_ptr<Edge>>		mountainEdges;
+
+		public:
+			void GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+
+		public:
+			Section( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges );
+		};
+
+
 
 
 	private:
@@ -153,10 +173,10 @@ namespace cck
 		int				GetNodeId( const cck::GeoCoord& coord ) const;
 
 	public:
-		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double nodeRadius );
-		cck::NodeError	AddNode( const int id, const cck::GeoCoord& coord, const double nodeRadius );
+		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double height, const double nodeRadius );
+		cck::NodeError	AddNode( const int id, const cck::GeoCoord& coord, const double height, const double nodeRadius );
 
-		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double borderScale );
+		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainHeight, const double mountainRadius, const double mountainPlateau );
 
 		void			GetData( const double latitude, const double longitude, double& height, int& id ) const;
 		void			GetData( const cck::GeoCoord& coord, double& height, int& id ) const;

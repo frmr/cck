@@ -53,7 +53,7 @@ void cck::Globe::Edge::AddSides()
 	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
 }
 
-void cck::Globe::Edge::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
+void cck::Globe::Edge::GetContinentData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
 {
 	if ( PointOnFreeSide( point ) )
 	{
@@ -74,31 +74,61 @@ void cck::Globe::Edge::GetData( const cck::GeoCoord& coord, const cck::Vec3& poi
 	}
 }
 
-double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const
+void cck::Globe::Edge::GetMountainData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
 {
-	const cck::Vec3 closest = ClosestPoint( point.Unit() );
+	if ( PointOnFreeSide( point ) )
+	{
+		const cck::Vec3 closest = ClosestPoint( point );
 
-	if ( Contains( closest ) )
-	{
-		const cck::GeoCoord closestCoord = closest.ToGeographic();
-		const double maxDist = nodeA->radius + ( nodeB->radius - nodeA->radius ) * cck::Distance( nodeA->coord, closestCoord, globeRadius ) / length;
-		const double influence = cck::Distance( coord, closestCoord, globeRadius ) / maxDist;
-		return influence <= 1.0 ? influence : 0.0;
-	}
-	else
-	{
-		return 0.0;
+		if ( Contains( closest ) )
+		{
+			const cck::GeoCoord closestCoord = closest.ToGeographic();
+			const double maxDist = nodeA->radius + ( nodeB->radius - nodeA->radius ) * cck::Distance( nodeA->coord, closestCoord, globeRadius ) / length;
+			const double distance = cck::Distance( coord, closestCoord, globeRadius );
+			if ( distance < maxDist )
+			{
+				const double influence = 1.0 - ( distance / maxDist );
+				height = influence;
+				id = 1;
+			}
+		}
 	}
 }
 
-cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double borderScale, const double globeRadius )
+//double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const
+//{
+//	const cck::Vec3 closest = ClosestPoint( point.Unit() );
+//
+//	if ( Contains( closest ) )
+//	{
+//		const cck::GeoCoord closestCoord = closest.ToGeographic();
+//		const double maxDist = nodeA->radius + ( nodeB->radius - nodeA->radius ) * cck::Distance( nodeA->coord, closestCoord, globeRadius ) / length;
+//		const double influence = cck::Distance( coord, closestCoord, globeRadius ) / maxDist;
+//		return influence <= 1.0 ? influence : 0.0;
+//	}
+//	else
+//	{
+//		return 0.0;
+//	}
+//}
+
+cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius )
 	:	nodeA( nodeA ),
 		nodeB( nodeB ),
-		borderScale( borderScale ),
 		length( cck::Distance( nodeA->coord, nodeB->coord, globeRadius ) ),
+		centerNode( std::make_shared<Node>( ( ( nodeA->coord.ToCartesian( globeRadius ) + nodeB->coord.ToCartesian( globeRadius ) ) * 0.5f ).ToGeographic(), globeRadius, mountainHeight, mountainRadius, mountainPlateau ) ),
 		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ).Unit() )
 {
-	//midpoint =
+	//Link two new nodes to centerNode
+}
+
+cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double globeRadius )
+	:	nodeA( nodeA ),
+		nodeB( nodeB ),
+		length( cck::Distance( nodeA->coord, nodeB->coord, globeRadius ) ),
+		centerNode( nullptr ), //mountain Edge has no center Node
+		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ).Unit() )
+{
 }
 
 bool cck::Globe::Side::FormsTriangle() const
@@ -155,13 +185,13 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( cons
 	return commonNeighbors;
 }
 
-void cck::Globe::Node::GetData( const cck::GeoCoord &pointCoord, const double globeRadius, double& height, int& id ) const
+void cck::Globe::Node::GetData( const cck::GeoCoord &pointCoord, const double globeRadius, double& sampleHeight, int& sampleId ) const
 {
 	const double distance = cck::Distance( coord, pointCoord, globeRadius );
 	if ( distance < radius )
 	{
-		height = 1.0 - distance / radius;
-		id = 1;
+		sampleHeight = 1.0 - distance / radius;
+		sampleId = 1;
 	}
 }
 
@@ -182,12 +212,27 @@ void cck::Globe::Node::AddLink( const shared_ptr<Link>& newLink )
 	links.push_back( newLink );
 }
 
-cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const Vec3& position, const double radius )
+cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const double globeRadius, const double height, const double radius )
 	:	id( id ),
 		coord( coord ),
-		position( position ),
+		position( coord.ToCartesian( globeRadius ) ),
 		unitVec( position.Unit() ),
-		radius( radius )
+		height( height ),
+		radius( radius ),
+		plateau( 0.0 )
+
+{
+}
+
+cck::Globe::Node::Node( const cck::GeoCoord& coord, const double globeRadius, const double height, const double radius, const double plateau )
+	:	id( -1 ),
+		coord( coord ),
+		position( coord.ToCartesian( globeRadius ) ),
+		unitVec( position.Unit() ),
+		height( height ),
+		radius( radius ),
+		plateau( plateau )
+
 {
 }
 
@@ -234,22 +279,22 @@ void cck::Globe::Triangle::GetData( const cck::GeoCoord& coord, const cck::Vec3&
 	//return average height
 }
 
-int cck::Globe::Triangle::GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const
-{
-	int closestNode = -1;
-	double closestDist = std::numeric_limits<double>::max();
-
-    for ( const auto& node : nodes )
-	{
-		double dist = node->radius * Distance( node->coord, coord, globeRadius );
-		if (  dist < closestDist )
-		{
-			closestNode = node->id;
-			closestDist = dist;
-		}
-	}
-	return closestNode;
-}
+//int cck::Globe::Triangle::GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const
+//{
+//	int closestNode = -1;
+//	double closestDist = std::numeric_limits<double>::max();
+//
+//    for ( const auto& node : nodes )
+//	{
+//		double dist = node->radius * Distance( node->coord, coord, globeRadius );
+//		if (  dist < closestDist )
+//		{
+//			closestNode = node->id;
+//			closestDist = dist;
+//		}
+//	}
+//	return closestNode;
+//}
 
 cck::Globe::Triangle::Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides )
 	: sides( sides )
@@ -259,7 +304,43 @@ cck::Globe::Triangle::Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<
 	nodes.push_back( nodeC );
 }
 
-cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, const double borderScale )
+void cck::Globe::Section::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
+{
+	double highest = std::numeric_limits<double>::min();
+
+	for ( const auto& edge : mountainEdges )
+	{
+		edge->GetMountainData( coord, point, globeRadius, height, id );
+		if ( height > highest )
+		{
+			highest = height;
+		}
+	}
+
+	if ( highest == std::numeric_limits<double>::min() )
+	{
+		for ( const auto& node : mountainNodes )
+		{
+			node->GetData( coord, globeRadius, height, id );
+			if ( height > highest )
+			{
+				highest = height;
+			}
+		}
+	}
+
+	height = highest;
+	id = baseNode->id;
+}
+
+cck::Globe::Section::Section( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges )
+	:	baseNode( baseNode ),
+		mountainNodes( mountainNodes ),
+		mountainEdges( mountainEdges )
+{
+}
+
+cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainHeight, const double mountainRadius, const double mountainPlateau )
 {
 	if ( nodeIdA < 0 || nodeIdB < 0 )
 	{
@@ -313,7 +394,7 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 	}
 
 	//Create temporary edge to test new Triangles
-	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, borderScale, globeRadius ) );
+	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, mountainHeight, mountainRadius, mountainPlateau, globeRadius ) );
 	tempEdge->AddSides();
 
 	//Search for common neighbors of nodeA and nodeB that form a Triangle
@@ -362,12 +443,12 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
     return cck::LinkError::SUCCESS;
 }
 
-cck::NodeError cck::Globe::AddNode( const int id, const double latitude, const double longitude, const double nodeRadius )
+cck::NodeError cck::Globe::AddNode( const int id, const double latitude, const double longitude, const double height, const double nodeRadius )
 {
-	return AddNode( id, cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ), nodeRadius );
+	return AddNode( id, cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ), height, nodeRadius );
 }
 
-cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, const double nodeRadius )
+cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, const double height, const double nodeRadius )
 {
 	if ( id < 0 )
 	{
@@ -392,6 +473,11 @@ cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, co
 		return cck::NodeError::LONGITUDE_OUT_OF_RANGE;
 	}
 
+	if ( height < 0.0 )
+	{
+		return cck::NodeError::NEGATIVE_HEIGHT;
+	}
+
 	if ( nodeRadius < 0.0 )
 	{
 		return cck::NodeError::NEGATIVE_RADIUS;
@@ -401,7 +487,7 @@ cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, co
 		return cck::NodeError::DIAMETER_EXCEEDS_SPHERE_CIRCUMFERENCE;
 	}
 
-	nodes.push_back( std::make_shared<Node>( id, coord, coord.ToCartesian( globeRadius ), nodeRadius ) );
+	nodes.push_back( std::make_shared<Node>( id, coord, globeRadius, height, nodeRadius ) );
 
 	return cck::NodeError::SUCCESS;
 }
@@ -514,7 +600,7 @@ void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) 
 			double tempHeight = std::numeric_limits<double>::min();
 			int tempId = -1;
 
-			edge->GetData( coord, point, globeRadius, tempHeight, tempId );
+			edge->GetContinentData( coord, point, globeRadius, tempHeight, tempId );
 
 			if ( tempHeight > highestHeight )
 			{
