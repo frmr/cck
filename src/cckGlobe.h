@@ -125,7 +125,7 @@ namespace cck
 		private:
 			cck::Vec3					midpoint;
 			vector<shared_ptr<Node>>	nodes;
-			vector<shared_ptr<Side>>	sides;
+			vector<shared_ptr<Side>>	sides; 
 			//TODO: Bounding box class
 
 		private:
@@ -158,6 +158,60 @@ namespace cck
 			Section( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges );
 		};
 
+
+
+
+		class BspTree
+		{
+		private:
+			
+			class BspNode
+			{
+			protected:
+				const shared_ptr<Edge> edge;
+
+			protected:
+				virtual shared_ptr<BspNode> GetChild( const cck::Vec3& point ) const;
+
+			protected:
+				BspNode( const shared_ptr<Edge>& edge );
+			};
+
+
+			class BspInternalNode : public BspNode
+			{
+			private:
+				const shared_ptr<BspNode> posNode;
+				const shared_ptr<BspNode> negNode;
+
+			public:
+				bool AddChildren( const shared_ptr<BspNode>& posNode, const shared_ptr<BspNode>& negNode );
+				shared_ptr<BspNode> GetChild( const cck::Vec3& point ) const;
+
+			public:
+				BspInternalNode( const shared_ptr<Edge>& edge, const shared_ptr<BspNode>& posNode, const shared_ptr<BspNode>& negNode );
+			};
+
+
+			class BspLeafNode : public BspNode
+			{
+			private:
+				const shared_ptr<Section> posSection;
+				const shared_ptr<Section> negSection;
+
+			public:
+				shared_ptr<BspNode> GetChild( const cck::Vec3& point ) const;
+
+			public:
+				BspLeafNode( const shared_ptr<Edge>& edge, const Section& posSection, const Section& negSection );
+				
+			};
+
+		public:
+			shared_ptr<Section> GetSection( const cck::Vec3& point ) const;
+
+		public:
+			BspTree( 
 
 
 

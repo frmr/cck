@@ -120,6 +120,9 @@ cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& n
 		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ).Unit() )
 {
 	//Link two new nodes to centerNode
+	auto positiveNode = std::make_shared<Node>( ( centerNode->position + normal ).ToGeographic(), globeRadius, mountainHeight, mountainRadius, mountainPlateau );
+	auto negativeNode = std::make_shared<Node>( ( centerNode->position - normal ).ToGeographic(), globeRadius, mountainHeight, mountainRadius, mountainPlateau );
+	//Globe::LinkNodes
 }
 
 cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double globeRadius )
