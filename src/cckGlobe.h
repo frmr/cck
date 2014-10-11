@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <queue>
 
 #include "cckError.h"
 #include "cckGeoCoord.h"
@@ -125,7 +126,7 @@ namespace cck
 		private:
 			cck::Vec3					midpoint;
 			vector<shared_ptr<Node>>	nodes;
-			vector<shared_ptr<Side>>	sides; 
+			vector<shared_ptr<Side>>	sides;
 			//TODO: Bounding box class
 
 		private:
@@ -138,7 +139,6 @@ namespace cck
 
 		public:
 			Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides );
-
 		};
 
 
@@ -164,33 +164,40 @@ namespace cck
 		class BspTree
 		{
 		private:
-			
+
+
+
 			class BspNode
 			{
-			protected:
+			public:
+				virtual bool				AddSections( std::queue<bool>& coordinate, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection );
+				virtual bool				AddNodes( std::queue<bool>& coordinate, const shared_ptr<Edge>& posEdge, const shared_ptr<Edge>& negEdge );
+				virtual shared_ptr<Section> GetSection( const cck::Vec3& point ) const;
+
+			public:
 				const shared_ptr<Edge> edge;
 
-			protected:
-				virtual shared_ptr<BspNode> GetChild( const cck::Vec3& point ) const;
-
-			protected:
+			public:
 				BspNode( const shared_ptr<Edge>& edge );
 			};
+
 
 
 			class BspInternalNode : public BspNode
 			{
 			private:
-				const shared_ptr<BspNode> posNode;
-				const shared_ptr<BspNode> negNode;
+				shared_ptr<BspNode> posNode;
+				shared_ptr<BspNode> negNode;
 
 			public:
-				bool AddChildren( const shared_ptr<BspNode>& posNode, const shared_ptr<BspNode>& negNode );
-				shared_ptr<BspNode> GetChild( const cck::Vec3& point ) const;
+				bool				AddSections( std::queue<bool>& coordinate, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection );
+				bool				AddNodes( std::queue<bool>& coordinate, const shared_ptr<Edge>& posEdge, const shared_ptr<Edge>& negEdge );
+				shared_ptr<Section>	GetSection( const cck::Vec3& point ) const;
 
 			public:
-				BspInternalNode( const shared_ptr<Edge>& edge, const shared_ptr<BspNode>& posNode, const shared_ptr<BspNode>& negNode );
+				BspInternalNode( const shared_ptr<Edge>& edge );
 			};
+
 
 
 			class BspLeafNode : public BspNode
@@ -200,18 +207,28 @@ namespace cck
 				const shared_ptr<Section> negSection;
 
 			public:
-				shared_ptr<BspNode> GetChild( const cck::Vec3& point ) const;
+				bool				AddSections( const std::queue<bool>& coordinate, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection );
+				bool				AddNodes( const std::queue<bool>& coordinate, const shared_ptr<Edge>& posEdge, const shared_ptr<Edge>& negEdge );
+				shared_ptr<Section> GetSection( const cck::Vec3& point ) const;
 
 			public:
-				BspLeafNode( const shared_ptr<Edge>& edge, const Section& posSection, const Section& negSection );
-				
+				BspLeafNode( const shared_ptr<Edge>& edge, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection );
 			};
 
-		public:
-			shared_ptr<Section> GetSection( const cck::Vec3& point ) const;
+
+
+		private:
+			shared_ptr<BspNode> root;
 
 		public:
-			BspTree( 
+			bool				AddSections( std::queue<bool>& coordinate, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection );
+			bool				AddNodes( std::queue<bool>& coordinate, const shared_ptr<Edge>& posEdge, const shared_ptr<Edge>& negEdge );
+			shared_ptr<Section>	GetSection( const cck::Vec3& point ) const;
+
+		public:
+			BspTree( const shared_ptr<Edge>& edge );
+		};
+
 
 
 

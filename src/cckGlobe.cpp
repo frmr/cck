@@ -343,6 +343,192 @@ cck::Globe::Section::Section( const shared_ptr<Node>& baseNode, const vector<sha
 {
 }
 
+
+
+
+
+bool cck::Globe::BspTree::BspNode::AddSections( std::queue<bool>& coordinate, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection )
+{
+	//should never get to this point
+	return false;
+}
+
+bool cck::Globe::BspTree::BspNode::AddNodes( std::queue<bool>& coordinate, const shared_ptr<Edge>& posEdge, const shared_ptr<Edge>& negEdge )
+{
+	//should never get to this point
+	return false;
+}
+
+shared_ptr<cck::Globe::Section> cck::Globe::BspTree::BspNode::GetSection( const cck::Vec3& point ) const
+{
+	return nullptr;
+}
+
+cck::Globe::BspTree::BspNode::BspNode( const shared_ptr<Edge>& edge )
+	: edge( edge )
+{
+}
+
+bool cck::Globe::BspTree::BspInternalNode::AddSections( std::queue<bool>& coordinate, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection )
+{
+	if ( coordinate.empty() )
+	{
+		return false;
+	}
+	else if ( coordinate.size() == 1 )
+	{
+		if ( coordinate.front() == true )
+		{
+			posNode = std::static_pointer_cast<cck::Globe::BspTree::BspNode>( std::make_shared<cck::Globe::BspTree::BspLeafNode>( posNode->edge, posSection, negSection ) );
+			return true;
+		}
+		else
+		{
+			negNode = std::static_pointer_cast<cck::Globe::BspTree::BspNode>( std::make_shared<cck::Globe::BspTree::BspLeafNode>( negNode->edge, posSection, negSection ) );
+			return true;
+		}
+	}
+	else
+	{
+		if ( coordinate.front() == true )
+		{
+			coordinate.pop();
+			return posNode->AddSections( coordinate, posSection, negSection );
+		}
+		else
+		{
+			coordinate.pop();
+			return negNode->AddSections( coordinate, posSection, negSection );
+		}
+	}
+}
+
+bool cck::Globe::BspTree::BspInternalNode::AddNodes( std::queue<bool>& coordinate, const shared_ptr<Edge>& posEdge, const shared_ptr<Edge>& negEdge )
+{
+	if ( coordinate.empty() )
+	{
+		posNode = std::make_shared<cck::Globe::BspTree::BspNode>( posEdge );
+		negNode = std::make_shared<cck::Globe::BspTree::BspNode>( negEdge );
+		return true;
+	}
+	else if ( coordinate.size() == 1 )
+	{
+		if ( coordinate.front() == true )
+		{
+			coordinate.pop();
+			posNode = std::static_pointer_cast<cck::Globe::BspTree::BspNode>( std::make_shared<cck::Globe::BspTree::BspInternalNode>( posNode->edge ) );
+			return posNode->AddNodes( coordinate, posEdge, negEdge );
+		}
+		else
+		{
+			coordinate.pop();
+			negNode = std::static_pointer_cast<cck::Globe::BspTree::BspNode>( std::make_shared<cck::Globe::BspTree::BspInternalNode>( negNode->edge ) );
+			return negNode->AddNodes( coordinate, posEdge, negEdge );
+		}
+	}
+	else
+	{
+		if ( coordinate.front() == true )
+		{
+			coordinate.pop();
+			return posNode->AddNodes( coordinate, posEdge, negEdge );
+		}
+		else
+		{
+			coordinate.pop();
+			return negNode->AddNodes( coordinate, posEdge, negEdge );
+		}
+	}
+}
+
+shared_ptr<cck::Globe::Section>	cck::Globe::BspTree::BspInternalNode::GetSection( const cck::Vec3& point ) const
+{
+	if ( cck::DotProduct( edge->normal, point ) >= 0.0 )
+	{
+		return posNode->GetSection( point );
+	}
+	else
+	{
+		return negNode->GetSection( point );
+	}
+}
+
+cck::Globe::BspTree::BspInternalNode::BspInternalNode( const shared_ptr<Edge>& edge )
+	:	BspNode( edge )
+{
+}
+
+bool cck::Globe::BspTree::BspLeafNode::AddSections( const std::queue<bool>& coordinate, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection )
+{
+	//cannot add sections to a leaf node, which already has sections defined in its constructor
+	return false;
+}
+
+bool cck::Globe::BspTree::BspLeafNode::AddNodes( const std::queue<bool>& coordinate, const shared_ptr<Edge>& posEdge, const shared_ptr<Edge>& negEdge )
+{
+	//a leaf node has no child nodes
+	return false;
+}
+
+shared_ptr<cck::Globe::Section> cck::Globe::BspTree::BspLeafNode::GetSection( const cck::Vec3& point ) const
+{
+    if ( cck::DotProduct( edge->normal, point ) >= 0.0 )
+    {
+		return posSection;
+    }
+    else
+    {
+		return negSection;
+    }
+}
+
+cck::Globe::BspTree::BspLeafNode::BspLeafNode( const shared_ptr<Edge>& edge, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection )
+	:	BspNode( edge ),
+		posSection( posSection ),
+		negSection( negSection )
+{
+}
+
+bool cck::Globe::BspTree::AddSections( std::queue<bool>& coordinate, const shared_ptr<Section>& posSection, const shared_ptr<Section>& negSection )
+{
+	if ( coordinate.empty() )
+	{
+		root = std::static_pointer_cast<cck::Globe::BspTree::BspNode>( std::make_shared<cck::Globe::BspTree::BspLeafNode>( root->edge, posSection, negSection ) );
+		return true;
+	}
+	else
+	{
+		return root->AddSections( coordinate, posSection, negSection );
+	}
+}
+
+bool cck::Globe::BspTree::AddNodes( std::queue<bool>& coordinate, const shared_ptr<Edge>& posEdge, const shared_ptr<Edge>& negEdge )
+{
+	if ( coordinate.empty() )
+	{
+		root = std::static_pointer_cast<cck::Globe::BspTree::BspNode>( std::make_shared<cck::Globe::BspTree::BspInternalNode>( root->edge ) );
+		return true;
+	}
+	else
+	{
+		return root->AddNodes( coordinate, posEdge, negEdge );
+	}
+}
+
+shared_ptr<cck::Globe::Section>	cck::Globe::BspTree::GetSection( const cck::Vec3& point ) const
+{
+	return root->GetSection( point );
+}
+
+cck::Globe::BspTree::BspTree( const shared_ptr<Edge>& edge )
+	:	root( std::make_shared<cck::Globe::BspTree::BspNode>( edge ) )
+{
+}
+
+
+
+
+
 cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainHeight, const double mountainRadius, const double mountainPlateau )
 {
 	if ( nodeIdA < 0 || nodeIdB < 0 )
