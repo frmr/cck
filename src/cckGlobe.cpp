@@ -7,9 +7,187 @@
 #include <map>
 #include <iostream> //TODO: Remove this
 
+bool cck::Globe::BspTree::BspNode::AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge )
+{
+	if ( segment == nullptr )
+	{
+		if ( coord.empty() )
+		{
+			if ( edge == nullptr )
+			{
+				edge = newEdge;
+				posChild = std::make_shared<BspNode>();
+				negChild = std::make_shared<BspNode>();
+				return true;
+			}
+		}
+		else
+		{
+			if ( posChild == nullptr || negChild == nullptr )
+			{
+				return false;
+			}
+
+			if ( coord.front() == true )
+			{
+				if ( posChild != nullptr )
+				{
+					coord.pop();
+					return posChild->AddChildren( coord, newEdge );
+				}
+			}
+			else
+			{
+				if ( negChild != nullptr )
+				{
+					coord.pop();
+					return negChild->AddChildren( coord, newEdge );
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool cck::Globe::BspTree::BspNode::AddSegment( std::queue<bool>& coord, const shared_ptr<Segment>& newSegment )
+{
+	if ( coord.empty() )
+	{
+		if ( segment == nullptr )
+		{
+			segment = newSegment;
+			return true;
+		}
+	}
+	else
+	{
+		if ( coord.front() == true )
+		{
+			if ( posChild != nullptr )
+			{
+				coord.pop();
+				return posChild->AddSegment( coord, newSegment );
+			}
+		}
+		else
+		{
+			if ( negChild != nullptr )
+			{
+				coord.pop();
+				return negChild->AddSegment( coord, newSegment );
+			}
+		}
+	}
+	return false;
+}
+
+shared_ptr<cck::Globe::Segment>	cck::Globe::BspTree::BspNode::GetSegment( const cck::Vec3& point ) const
+{
+	if ( segment == nullptr )
+	{
+		if ( cck::DotProduct( edge->normal, point ) >= 0.0 )
+		{
+			return posChild->GetSegment( point );
+		}
+		else
+		{
+			return negChild->GetSegment( point );
+		}
+	}
+	else
+	{
+		return segment;
+	}
+
+}
+
+bool cck::Globe::BspTree::BspNode::IsComplete() const
+{
+	if ( segment != nullptr )
+	{
+		return true;
+	}
+	else
+	{
+		if ( posChild == nullptr || negChild == nullptr )
+		{
+			return false;
+		}
+		else if ( posChild->IsComplete() && negChild->IsComplete() )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+}
+
+cck::Globe::BspTree::BspNode::BspNode()
+	:	edge( nullptr ),
+		segment( nullptr ),
+		posChild( nullptr ),
+		negChild( nullptr )
+{
+}
+
+bool cck::Globe::BspTree::AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge )
+{
+	return root.AddChildren( coord, newEdge );
+}
+
+bool cck::Globe::BspTree::AddSegment( std::queue<bool>& coord, const shared_ptr<Segment>& newSegment )
+{
+	return root.AddSegment( coord, newSegment );
+}
+
+shared_ptr<cck::Globe::Segment>	cck::Globe::BspTree::GetSegment( const cck::Vec3& point ) const
+{
+	return root.GetSegment( point );
+}
+
+bool cck::Globe::BspTree::IsComplete() const
+{
+	return root.IsComplete();
+}
+
+cck::Globe::BspTree::BspTree()
+{
+}
+
 cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& point ) const
 {
 	return cck::Vec3( point - normal * cck::DotProduct( normal, point ) );
+}
+
+cck::Globe::BspTree cck::Globe::Edge::ConstructTree( const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius ) const
+{
+	//construct nodes either side of center node
+	auto positiveNode = std::make_shared<Node>( ( centerNode->position + normal ), mountainHeight, mountainRadius, mountainPlateau );
+	auto negativeNode = std::make_shared<Node>( ( centerNode->position - normal ), mountainHeight, mountainRadius, mountainPlateau );
+
+	vector<shared_ptr<Node>> mountainNodes;
+	vector<shared_ptr<Edge>> mountainEdges;
+	mountainEdges.push_back( std::make_shared<Edge>( positiveNode, negativeNode, globeRadius ) );
+
+	//divide edge into segments
+	auto segmentA = std::make_shared<Segment>( nodeA, mountainNodes, mountainEdges );
+	auto segmentB = std::make_shared<Segment>( nodeB, mountainNodes, mountainEdges );
+
+	//construct BspTree
+	BspTree tempTree;
+	std::queue<bool> coord;
+	tempTree.AddChildren( coord, mountainEdges[0] );
+
+	bool nodeDotProduct = cck::DotProduct( mountainEdges[0]->normal, nodeA->position ) >= 0.0;
+	coord.push( nodeDotProduct );
+	tempTree.AddSegment( coord, segmentA );
+
+	coord.push( !nodeDotProduct );
+	tempTree.AddSegment( coord, segmentB );
+
+	return tempTree;
 }
 
 bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
@@ -117,13 +295,10 @@ cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& n
 	:	nodeA( nodeA ),
 		nodeB( nodeB ),
 		length( cck::Distance( nodeA->coord, nodeB->coord, globeRadius ) ),
-		centerNode( std::make_shared<Node>( ( ( nodeA->coord.ToCartesian( globeRadius ) + nodeB->coord.ToCartesian( globeRadius ) ) * 0.5f ).ToGeographic(), globeRadius, mountainHeight, mountainRadius, mountainPlateau ) ),
-		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ).Unit() )
+		centerNode( std::make_shared<Node>( ( nodeA->coord.ToCartesian( globeRadius ) + nodeB->coord.ToCartesian( globeRadius ) ) * 0.5f , mountainHeight, mountainRadius, mountainPlateau ) ),
+		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ).Unit() ),
+		tree( ConstructTree( mountainHeight, mountainRadius, mountainPlateau, globeRadius ) )
 {
-	//Link two new nodes to centerNode
-	auto positiveNode = std::make_shared<Node>( ( centerNode->position + normal ).ToGeographic(), globeRadius, mountainHeight, mountainRadius, mountainPlateau );
-	auto negativeNode = std::make_shared<Node>( ( centerNode->position - normal ).ToGeographic(), globeRadius, mountainHeight, mountainRadius, mountainPlateau );
-	//Globe::LinkNodes
 }
 
 cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double globeRadius )
@@ -226,7 +401,7 @@ bool cck::Globe::Node::LinkedTo( const int nodeId ) const
 	return false;
 }
 
-cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const double globeRadius, const double height, const double radius )
+cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const double height, const double radius, const double globeRadius )
 	:	id( id ),
 		coord( coord ),
 		position( coord.ToCartesian( globeRadius ) ),
@@ -237,15 +412,20 @@ cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const double g
 {
 }
 
-cck::Globe::Node::Node( const cck::GeoCoord& coord, const double globeRadius, const double height, const double radius, const double plateau )
+cck::Globe::Node::Node( const cck::Vec3& position, const double height, const double radius, const double plateau )
 	:	id( -1 ),
-		coord( coord ),
-		position( coord.ToCartesian( globeRadius ) ),
+		coord( position.ToGeographic() ),
+		position( position ),
 		unitVec( position.Unit() ),
 		height( height ),
 		radius( radius ),
 		plateau( plateau )
 {
+}
+
+cck::Globe::BspTree cck::Globe::Triangle::ConstructTree() const
+{
+
 }
 
 bool cck::Globe::Triangle::Contains( const cck::Vec3& unitVec ) const
@@ -258,6 +438,38 @@ bool cck::Globe::Triangle::Contains( const cck::Vec3& unitVec ) const
 		}
 	}
 	return true;
+}
+
+cck::Globe::Node cck::Globe::Triangle::CreateCenterNode() const
+{
+	//average node positions
+	cck::Vec3 averagePosition;
+	double averageHeight = 0.0;
+	double averageRadius = 0.0;
+	double averagePlateau = 0.0;
+
+	for ( const auto& node : nodes )
+	{
+		averagePosition += node->position;
+		averageHeight += node->height;
+		averageRadius += node->radius;
+		averagePlateau += node->plateau;
+	}
+	averagePosition /= 3.0;
+	averageHeight /= 3.0;
+	averageRadius /= 3.0;
+	averagePlateau /= 3.0;
+
+	return Node( averagePosition, averageHeight, averageRadius, averagePlateau );
+}
+
+vector<shared_ptr<cck::Globe::Node>> cck::Globe::Triangle::CreateNodeVector( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC ) const
+{
+	vector<shared_ptr<Node>> tempVector;
+	tempVector.push_back( nodeA );
+	tempVector.push_back( nodeB );
+	tempVector.push_back( nodeC );
+	return tempVector;
 }
 
 void cck::Globe::Triangle::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
@@ -291,29 +503,13 @@ void cck::Globe::Triangle::GetData( const cck::GeoCoord& coord, const cck::Vec3&
 	//return average height
 }
 
-//int cck::Globe::Triangle::GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const
-//{
-//	int closestNode = -1;
-//	double closestDist = std::numeric_limits<double>::max();
-//
-//    for ( const auto& node : nodes )
-//	{
-//		double dist = node->radius * Distance( node->coord, coord, globeRadius );
-//		if (  dist < closestDist )
-//		{
-//			closestNode = node->id;
-//			closestDist = dist;
-//		}
-//	}
-//	return closestNode;
-//}
-
 cck::Globe::Triangle::Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides )
-	: sides( sides )
+	:	nodes( CreateNodeVector( nodeA, nodeB, nodeC ) ),
+		centerNode( CreateCenterNode() ),
+		sides( sides ),
+		tree( ConstructTree() )
 {
-	nodes.push_back( nodeA );
-	nodes.push_back( nodeB );
-	nodes.push_back( nodeC );
+
 }
 
 void cck::Globe::Segment::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
@@ -349,142 +545,6 @@ cck::Globe::Segment::Segment( const shared_ptr<Node>& baseNode, const vector<sha
 	:	baseNode( baseNode ),
 		mountainNodes( mountainNodes ),
 		mountainEdges( mountainEdges )
-{
-}
-
-
-
-bool cck::Globe::BspTree::BspNode::AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge )
-{
-	if ( segment == nullptr )
-	{
-		if ( coord.empty() )
-		{
-			if ( edge == nullptr )
-			{
-				edge = newEdge;
-				posChild = std::make_shared<BspNode>();
-				negChild = std::make_shared<BspNode>();
-				return true;
-			}
-		}
-		else
-		{
-			if ( posChild == nullptr || negChild == nullptr )
-			{
-				return false;
-			}
-
-			if ( coord.front() == true )
-			{
-				if ( posChild != nullptr )
-				{
-					coord.pop();
-					return posChild->AddChildren( coord, newEdge );
-				}
-			}
-			else
-			{
-				if ( negChild != nullptr )
-				{
-					coord.pop();
-					return negChild->AddChildren( coord, newEdge );
-				}
-			}
-		}
-	}
-	return false;
-}
-
-bool cck::Globe::BspTree::BspNode::AddSegment( std::queue<bool>& coord, const shared_ptr<Segment>& newSegment )
-{
-	if ( coord.empty() )
-	{
-		if ( segment == nullptr )
-		{
-			segment = newSegment;
-			return true;
-		}
-	}
-	else
-	{
-		if ( coord.front() == true )
-		{
-			if ( posChild != nullptr )
-			{
-				coord.pop();
-				return posChild->AddSegment( coord, newSegment );
-			}
-		}
-		else
-		{
-			if ( negChild != nullptr )
-			{
-				coord.pop();
-				return negChild->AddSegment( coord, newSegment );
-			}
-		}
-	}
-	return false;
-}
-
-shared_ptr<cck::Globe::Segment>	cck::Globe::BspTree::BspNode::GetSegment( const cck::Vec3& point ) const
-{
-	return segment;
-}
-
-bool cck::Globe::BspTree::BspNode::IsComplete() const
-{
-	if ( segment != nullptr )
-	{
-		return true;
-	}
-	else
-	{
-		if ( posChild == nullptr || negChild == nullptr )
-		{
-			return false;
-		}
-		else if ( posChild->IsComplete() && negChild->IsComplete() )
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-}
-
-cck::Globe::BspTree::BspNode::BspNode()
-	:	edge( nullptr ),
-		segment( nullptr ),
-		posChild( nullptr ),
-		negChild( nullptr )
-{
-}
-
-bool cck::Globe::BspTree::AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge )
-{
-	return root.AddChildren( coord, newEdge );
-}
-
-bool cck::Globe::BspTree::AddSegment( std::queue<bool>& coord, const shared_ptr<Segment>& newSegment )
-{
-	return root.AddSegment( coord, newSegment );
-}
-
-shared_ptr<cck::Globe::Segment>	cck::Globe::BspTree::GetSegment( const cck::Vec3& point ) const
-{
-	return root.GetSegment( point );
-}
-
-bool cck::Globe::BspTree::IsComplete() const
-{
-	return root.IsComplete();
-}
-
-cck::Globe::BspTree::BspTree()
 {
 }
 
@@ -546,37 +606,6 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 	//Create temporary edge to test new Triangles
 	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, mountainHeight, mountainRadius, mountainPlateau, globeRadius ) );
 	tempEdge->AddSides();
-
-	shared_ptr<Edge> tempEdge2( new Edge( nodePtrA, nodePtrB, mountainHeight, mountainRadius, mountainPlateau, globeRadius ) );
-	tempEdge2->AddSides();
-
-	BspTree tree;
-	std::queue<bool> q;
-	std::cout << tree.AddChildren( q, tempEdge ) << std::endl;	//1
-
-	vector<shared_ptr<Node>> mountainNodes;
-	vector<shared_ptr<Edge>> mountainEdges;
-
-	shared_ptr<Segment> seg = std::make_shared<Segment>( nodePtrA, mountainNodes, mountainEdges );
-	shared_ptr<Segment> seg2 = std::make_shared<Segment>( nodePtrA, mountainNodes, mountainEdges );
-	q.push( false );
-
-	std::cout << tree.AddSegment( q, seg ) << std::endl;	//0
-
-	std::cout << q.size() << std::endl;	//1
-
-	q.push( true );
-
-	std::cout << tree.AddSegment( q, seg2 ) << std::endl; //0
-
-	if ( tree.IsComplete() )
-	{
-		std::cout << "Complete" << std::endl;
-	}
-	else
-	{
-		std::cout << "Not complete" << std::endl;
-	}
 
 	//Search for common neighbors of nodeA and nodeB that form a Triangle
 	vector<shared_ptr<Node>> commonNeighbors = nodePtrA->FindCommonNeighbors( nodePtrB ); //TODO: Tidy this and below loop up
@@ -668,7 +697,7 @@ cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, co
 		return cck::NodeError::DIAMETER_EXCEEDS_SPHERE_CIRCUMFERENCE;
 	}
 
-	nodes.push_back( std::make_shared<Node>( id, coord, globeRadius, height, nodeRadius ) );
+	nodes.push_back( std::make_shared<Node>( id, coord, height, nodeRadius, globeRadius ) );
 
 	return cck::NodeError::SUCCESS;
 }
