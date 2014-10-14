@@ -43,7 +43,8 @@ namespace cck
 			public:
 				bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& edge );
 				bool				AddSegment( std::queue<bool>& coord, const shared_ptr<Segment>& segment );
-				shared_ptr<Segment>	GetSegment( const cck::Vec3& point ) const;
+				void				GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+				//shared_ptr<Segment>	GetSegment( const cck::Vec3& point ) const;
 				bool				IsComplete() const;
 
 			public:
@@ -56,7 +57,8 @@ namespace cck
 		public:
 			bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& edge );
 			bool				AddSegment( std::queue<bool>& coord, const shared_ptr<Segment>& segment );
-			shared_ptr<Segment>	GetSegment( const cck::Vec3& point ) const;
+			void				GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+			//shared_ptr<Segment>	GetSegment( const cck::Vec3& point ) const;
 			bool				IsComplete() const;
 
 		public:
@@ -85,7 +87,7 @@ namespace cck
 
 		public:
 			void						AddSides();
-			void						GetContinentData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+			void						GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
 			void 						GetMountainData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
 			//double						GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const; //remove
 
@@ -170,15 +172,15 @@ namespace cck
 		{
 		private:
 			const vector<shared_ptr<Node>>	nodes;
-			const Node						centerNode;
 			const vector<shared_ptr<Side>>	sides;
+			const shared_ptr<Node>			centerNode;
 			const BspTree					tree;
 			//TODO: Bounding box class
 
 		private:
-			BspTree						ConstructTree() const;
+			BspTree						ConstructTree( const double globeRadius ) const;
 			bool 						Contains( const cck::Vec3& point ) const;
-			Node						CreateCenterNode() const;
+			shared_ptr<Node>			CreateCenterNode() const;
 			vector<shared_ptr<Node>>	CreateNodeVector( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC ) const;
 
 		public:
@@ -187,7 +189,7 @@ namespace cck
 
 
 		public:
-			Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides );
+			Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides, const double globeRadius );
 		};
 
 
@@ -196,15 +198,18 @@ namespace cck
 		class Segment
 		{
 		private:
-			const shared_ptr<Node>				baseNode;
-			const vector<shared_ptr<Node>>		mountainNodes;
-			const vector<shared_ptr<Edge>>		mountainEdges;
+			const shared_ptr<Node>		baseNode;
+			vector<shared_ptr<Node>>	mountainNodes;
+			vector<shared_ptr<Edge>>	mountainEdges;
 
 		public:
+			void AddEdge( const shared_ptr<Edge>& newEdge );
+			void AddNode( const shared_ptr<Node>& newNode );
 			void GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
 
 		public:
 			Segment( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges );
+			Segment( const shared_ptr<Node>& baseNode );
 		};
 
 
