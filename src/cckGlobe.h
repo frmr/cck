@@ -89,7 +89,7 @@ namespace cck
 			void						AddSides();
 			void						GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
 			double						GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const;
-			void 						GetMountainData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, const double segmentHeight, double& height ) const;
+			double 						GetMountainHeight( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, const double segmentHeight ) const;
 
 
 		public:
@@ -158,7 +158,7 @@ namespace cck
 			void						GetData( double& sampleHeight, int& sampleId ) const;
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const double globeRadius ) const;
 			shared_ptr<Link>			GetLinkTo( const int targetId ) const;
-			void						GetMountainData( const cck::GeoCoord &pointCoord, const double globeRadius, double& sampleHeight ) const;
+			double						GetMountainHeight( const cck::GeoCoord &pointCoord, const double globeRadius ) const;
 			bool						LinkedTo( const int nodeId ) const;
 
 		public:
@@ -227,7 +227,7 @@ namespace cck
 		const cck::SimplexNoise			noise;
 
 	private:
-		static double			CalculateMountainHeight( const double radius, const double plateau, const double distance, const double height );
+		static double	CalculateMountainHeight( const double segmentHeight, const double mountainHeight, const double radius, const double plateau, const double distance );
 
 	public:
 		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double height, const double nodeRadius );
