@@ -158,7 +158,7 @@ namespace cck
 			void						GetData( double& sampleHeight, int& sampleId ) const;
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const double globeRadius ) const;
 			shared_ptr<Link>			GetLinkTo( const int targetId ) const;
-			double						GetMountainHeight( const cck::GeoCoord &pointCoord, const double globeRadius ) const;
+			double						GetMountainHeight( const cck::GeoCoord& sampleCoord, const double globeRadius, const double segmentHeight ) const;
 			bool						LinkedTo( const int nodeId ) const;
 
 		public:
@@ -201,9 +201,11 @@ namespace cck
 		class Segment
 		{
 		private:
-			const shared_ptr<Node>		baseNode;
 			vector<shared_ptr<Node>>	mountainNodes;
 			vector<shared_ptr<Edge>>	mountainEdges;
+
+		public:
+			const shared_ptr<Node>		baseNode;
 
 		public:
 			void AddEdge( const shared_ptr<Edge>& newEdge );

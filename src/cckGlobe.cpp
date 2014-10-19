@@ -378,9 +378,7 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( cons
 void cck::Globe::Node::GetData( double& sampleHeight, int& sampleId ) const
 {
 	sampleHeight = height;
-	//sampleHeight = 50.0;
 	sampleId = id;
-	//std::cout << height << std::endl;
 }
 
 double cck::Globe::Node::GetInfluence( const cck::GeoCoord& sampleCoord, const double globeRadius ) const
@@ -405,17 +403,22 @@ shared_ptr<cck::Globe::Link> cck::Globe::Node::GetLinkTo( const int targetId ) c
 	return nullptr;
 }
 
-double cck::Globe::Node::GetMountainHeight( const cck::GeoCoord &pointCoord, const double globeRadius ) const
+double cck::Globe::Node::GetMountainHeight( const cck::GeoCoord& sampleCoord, const double globeRadius, const double segmentHeight ) const
 {
-	const double distance = cck::Distance( coord, pointCoord, globeRadius );
+	const double distance = cck::Distance( coord, sampleCoord, globeRadius );
+
 	if ( distance <= radius )
 	{
-		return height * ( 1.0 - ( distance / radius ) );
+		if ( distance <= plateau )
+		{
+			return height;
+		}
+		else
+		{
+			return cck::Globe::CalculateMountainHeight( segmentHeight, height, radius, plateau, distance );
+		}
 	}
-	else
-	{
-		return 0.0;
-	}
+	return 0.0;
 }
 
 bool cck::Globe::Node::LinkedTo( const int nodeId ) const
@@ -465,11 +468,11 @@ cck::Globe::BspTree cck::Globe::Triangle::ConstructTree( const double globeRadiu
     std::queue<bool> coord;
     tempTree.AddChildren( coord, mountainEdges[0] ); //TODO: Use iterators
 
-    bool nodeDotProduct = cck::DotProduct( mountainEdges[0]->normal, sides[1]->edge->centerNode->unitVec ) >= 0.0;
-	coord.push( nodeDotProduct );
+    bool dotNode1 = cck::DotProduct( mountainEdges[0]->normal, sides[1]->edge->centerNode->unitVec ) >= 0.0;
+	coord.push( dotNode1 );
     tempTree.AddChildren( coord, mountainEdges[1] );
 
-    coord.push( !nodeDotProduct );
+    coord.push( !dotNode1 );
     tempTree.AddChildren( coord, mountainEdges[2] );
 
 	vector<shared_ptr<Segment>> segments;
@@ -483,35 +486,23 @@ cck::Globe::BspTree cck::Globe::Triangle::ConstructTree( const double globeRadiu
 		segment->AddNode( centerNode );
 	}
 
-	for ( const auto& edge : mountainEdges )
+	for ( int sideIndex = 1; sideIndex < 3; sideIndex++ )
 	{
-        //if ( )
+        for ( const auto& segment : segments )
+		{
+			if ( sides[sideIndex]->edge->nodeA == segment->baseNode || sides[sideIndex]->edge->nodeB == segment->baseNode )
+			{
+				segment->AddEdge( sides[sideIndex]->edge );
+				segment->AddNode( sides[sideIndex]->edge->centerNode );
+				bool dotCurrentEdge = cck::DotProduct( mountainEdges[sideIndex]->normal, segment->baseNode->unitVec ) >= 0.0;
+
+				coord.push( ( sideIndex == 1 ) ? dotNode1 : !dotNode1 );
+				coord.push( dotCurrentEdge );
+
+				tempTree.AddSegment( coord, segment );
+			}
+		}
 	}
-
-	//for node in nodes
-	//	if dot( node,
-
-
-//	vector<shared_ptr<Edge>> mountainEdges0;
-//	vector<shared_ptr<Edge>> mountainEdges1;
-//	vector<shared_ptr<Edge>> mountainEdges2;
-//
-//	vector<shared_ptr<Node>> mountainNodes0;
-//	vector<shared_ptr<Node>> mountainNodes1;
-//	vector<shared_ptr<Node>> mountainNodes2;
-//
-//
-//
-//
-//
-//	//determine which node is shared between the two edges
-//	shared_ptr<Segment> node1A = std::make_shared<Segment>( sides[1]->edge->nodeA,  );
-//	shared_ptr<Segment> node1B = std::make_shared<Segment>( sides[1]->edge->nodeB,  );
-//
-//
-////	coord.push( cck::DotProduct( mountainEdges[1]->normal, sides[1]->edge->nodeA ) >= 0.0 );
-////	tempTree.AddSegment( coord, std::make_shared(  ) )
-
 
     return tempTree;
 }
@@ -562,28 +553,9 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Triangle::CreateNodeVector( con
 
 bool cck::Globe::Triangle::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
 {
-	//dist to each node
-//	std::map<shared_ptr<Node>,double> nodeDistances;
-//
-//	for ( const auto& node : nodes )
-//	{
-//		nodeDistances.insert( std::pair<shared_ptr<Node>,double>( node, cck::Distance( node, coord, globeRadius ) ) ); //TODO: auto?
-//	}
-//
-//	//for each side, calculate height
-//	double highest = 0.0;
-//
-//	for ( const auto& side : sides )
-//	{
-//		double distA = nodeDistances[side->edge->nodeA];
-//		double distB = node
-//		double proportion = fabs( nodeDistances[side->edge->nodeA] / )
-//	}
-
 	if ( Contains( point ) )
 	{
-		height = 10.0;
-		id = 1;
+		tree.GetData( coord, point, globeRadius, height, id );
 		return true;
 	}
 
@@ -639,7 +611,7 @@ void cck::Globe::Segment::GetData( const cck::GeoCoord& coord, const cck::Vec3& 
 	{
 		for ( const auto& node : mountainNodes )
 		{
-			double mountainHeight = node->GetMountainHeight( coord, globeRadius );
+			double mountainHeight = node->GetMountainHeight( coord, globeRadius, baseNode->height );
 			if ( mountainHeight > highest )
 			{
 				highest = mountainHeight;
@@ -660,9 +632,9 @@ void cck::Globe::Segment::GetData( const cck::GeoCoord& coord, const cck::Vec3& 
 }
 
 cck::Globe::Segment::Segment( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges )
-	:	baseNode( baseNode ),
-		mountainNodes( mountainNodes ),
-		mountainEdges( mountainEdges )
+	:	mountainNodes( mountainNodes ),
+		mountainEdges( mountainEdges ),
+		baseNode( baseNode )
 {
 }
 
