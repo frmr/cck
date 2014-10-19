@@ -88,8 +88,9 @@ namespace cck
 		public:
 			void						AddSides();
 			void						GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
-			void 						GetMountainData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
-			//double						GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const; //remove
+			double						GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const;
+			void 						GetMountainData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, const double segmentHeight, double& height ) const;
+
 
 		public:
 			Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius );
@@ -154,9 +155,10 @@ namespace cck
 		public:
 			void 						AddLink( const shared_ptr<Link>& newLink );
 			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node>& refNode );
-			void						GetContinentData( const cck::GeoCoord &pointCoord, const double globeRadius, double& sampleHeight, int& sampleId ) const;
+			void						GetData( double& sampleHeight, int& sampleId ) const;
+			double						GetInfluence( const cck::GeoCoord& sampleCoord, const double globeRadius ) const;
 			shared_ptr<Link>			GetLinkTo( const int targetId ) const;
-			void						GetMountainData( const cck::GeoCoord &pointCoord, const double globeRadius, double& sampleHeight, int& sampleId ) const;
+			void						GetMountainData( const cck::GeoCoord &pointCoord, const double globeRadius, double& sampleHeight ) const;
 			bool						LinkedTo( const int nodeId ) const;
 
 		public:
@@ -184,7 +186,8 @@ namespace cck
 			vector<shared_ptr<Node>>	CreateNodeVector( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC ) const;
 
 		public:
-			void						GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+			bool						GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const;
+			double						GetInfluence( const cck::Vec3& point ) const;
 			//int		GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const;
 
 
@@ -217,14 +220,14 @@ namespace cck
 
 	private:
 		double							globeRadius;
+		double							seaScale;
 		vector<shared_ptr<Node>>		nodes;
 		vector<shared_ptr<Edge>>		edges;
 		vector<shared_ptr<Triangle>>	triangles;
-		const cck::SimplexNoise			simplex;
+		const cck::SimplexNoise			noise;
 
 	private:
-		void			GetHeight( const cck::GeoCoord& coord, double& height ) const;
-		int				GetNodeId( const cck::GeoCoord& coord ) const;
+		static double			CalculateMountainHeight( const double radius, const double plateau, const double distance, const double height );
 
 	public:
 		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double height, const double nodeRadius );
