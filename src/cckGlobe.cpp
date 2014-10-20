@@ -486,13 +486,21 @@ cck::Globe::BspTree cck::Globe::Triangle::ConstructTree( const double globeRadiu
 		segment->AddNode( centerNode );
 	}
 
+	for ( const auto& segment : segments )
+	{
+		if ( sides[0]->edge->nodeA == segment->baseNode || sides[0]->edge->nodeB == segment->baseNode )
+		{
+			segment->AddEdge( mountainEdges[0] );
+		}
+	}
+
 	for ( int sideIndex = 1; sideIndex < 3; sideIndex++ )
 	{
         for ( const auto& segment : segments )
 		{
 			if ( sides[sideIndex]->edge->nodeA == segment->baseNode || sides[sideIndex]->edge->nodeB == segment->baseNode )
 			{
-				segment->AddEdge( sides[sideIndex]->edge );
+				segment->AddEdge( mountainEdges[sideIndex] );
 				segment->AddNode( sides[sideIndex]->edge->centerNode );
 				bool dotCurrentEdge = cck::DotProduct( mountainEdges[sideIndex]->normal, segment->baseNode->unitVec ) >= 0.0;
 
