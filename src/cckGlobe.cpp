@@ -81,44 +81,24 @@ bool cck::Globe::BspTree::BspNode::AddSegment( std::queue<bool>& coord, const sh
 	return false;
 }
 
-void cck::Globe::BspTree::BspNode::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
+void cck::Globe::BspTree::BspNode::GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
 {
 	if ( segment == nullptr )
 	{
-		if ( cck::DotProduct( edge->normal, point ) >= 0.0 )
+		if ( cck::DotProduct( edge->normal, samplePoint ) >= 0.0 )
 		{
-			return posChild->GetData( coord, point, globeRadius, height, id );
+			return posChild->GetData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
 		}
 		else
 		{
-			return negChild->GetData( coord, point, globeRadius, height, id );
+			return negChild->GetData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
 		}
 	}
 	else
 	{
-		segment->GetData( coord, point, globeRadius, height, id );
+		segment->GetData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
 	}
 }
-//
-//shared_ptr<cck::Globe::Segment>	cck::Globe::BspTree::BspNode::GetSegment( const cck::Vec3& point ) const
-//{
-//	if ( segment == nullptr )
-//	{
-//		if ( cck::DotProduct( edge->normal, point ) >= 0.0 )
-//		{
-//			return posChild->GetSegment( point );
-//		}
-//		else
-//		{
-//			return negChild->GetSegment( point );
-//		}
-//	}
-//	else
-//	{
-//		return segment;
-//	}
-//
-//}
 
 bool cck::Globe::BspTree::BspNode::IsComplete() const
 {
@@ -161,9 +141,9 @@ bool cck::Globe::BspTree::AddSegment( std::queue<bool>& coord, const shared_ptr<
 	return root.AddSegment( coord, newSegment );
 }
 
-void cck::Globe::BspTree::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
+void cck::Globe::BspTree::GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
 {
-	root.GetData( coord, point, globeRadius, height, id );
+	root.GetData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
 }
 
 //shared_ptr<cck::Globe::Segment>	cck::Globe::BspTree::GetSegment( const cck::Vec3& point ) const
@@ -180,16 +160,16 @@ cck::Globe::BspTree::BspTree()
 {
 }
 
-cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& point ) const
+cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& samplePoint ) const
 {
-	return cck::Vec3( point - normal * cck::DotProduct( normal, point ) );
+	return cck::Vec3( samplePoint - normal * cck::DotProduct( normal, samplePoint ) );
 }
 
 cck::Globe::BspTree cck::Globe::Edge::ConstructTree( const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius ) const
 {
 	//construct nodes either side of center node
-	const auto positiveNode = std::make_shared<Node>( ( centerNode->position + normal ), mountainHeight, mountainRadius, mountainPlateau );
-	const auto negativeNode = std::make_shared<Node>( ( centerNode->position - normal ), mountainHeight, mountainRadius, mountainPlateau );
+	const auto positiveNode = std::make_shared<Node>( centerNode->position + normal * globeRadius, mountainHeight, mountainRadius, mountainPlateau );
+	const auto negativeNode = std::make_shared<Node>( centerNode->position - normal * globeRadius, mountainHeight, mountainRadius, mountainPlateau );
 
 	vector<shared_ptr<Node>> mountainNodes;
 	vector<shared_ptr<Edge>> mountainEdges;
@@ -230,13 +210,13 @@ bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
 	}
 }
 
-bool cck::Globe::Edge::PointOnFreeSide( const cck::Vec3& point ) const
+bool cck::Globe::Edge::PointOnFreeSide( const cck::Vec3& samplePoint ) const
 {
 	for ( const auto& side : sides )
 	{
 		if ( !side->FormsTriangle() )
 		{
-			if ( cck::DotProduct( point, side->normal ) >= 0.0 )
+			if ( cck::DotProduct( samplePoint, side->normal ) >= 0.0 )
 			{
 				return true;
 			}
@@ -252,22 +232,22 @@ void cck::Globe::Edge::AddSides()
 	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
 }
 
-void cck::Globe::Edge::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
+void cck::Globe::Edge::GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
 {
-	tree.GetData( coord, point, globeRadius, height, id );
+	tree.GetData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
 }
 
-double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius ) const
+double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const
 {
-	if ( PointOnFreeSide( point ) )
+	if ( PointOnFreeSide( samplePoint ) )
 	{
-		const cck::Vec3 closest = ClosestPoint( point );
+		const cck::Vec3 closest = ClosestPoint( samplePoint );
 
 		if ( Contains( closest ) )
 		{
 			const cck::GeoCoord closestCoord = closest.ToGeographic();
 			const double maxDist = nodeA->radius + ( nodeB->radius - nodeA->radius ) * cck::Distance( nodeA->coord, closestCoord, globeRadius ) / length;
-			const double distance = cck::Distance( coord, closestCoord, globeRadius );
+			const double distance = cck::Distance( sampleCoord, closestCoord, globeRadius );
 			if ( distance <= maxDist )
 			{
 				return 1.0 - ( distance / maxDist );
@@ -277,34 +257,33 @@ double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& coord, const cck::Ve
 	return 0.0;
 }
 
-double cck::Globe::Edge::GetMountainHeight( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, const double segmentHeight ) const //TODO: rename coord to sampleCoord in all such methods
+double cck::Globe::Edge::GetMountainHeight( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double segmentHeight ) const
 {
-	//return zero if point is outside edge boundary
-	//otherwise return result of mountain function
+	const cck::Vec3 closest = ClosestPoint( samplePoint );
 
-	const cck::Vec3 closest = ClosestPoint( point );
-
-	const cck::GeoCoord closestCoord = closest.ToGeographic();
-	const double closestDistToNodeA = cck::Distance( nodeA->coord, closestCoord, globeRadius );
-	const double edgeRadius = nodeA->radius + ( ( nodeB->radius - nodeA->radius ) * ( closestDistToNodeA / length ) );
-	const double distance = cck::Distance( coord, closestCoord, globeRadius );
-
-	//std::cout << nodeA->radius << " " << nodeB->radius << " " << closestDistToNodeA << " " << length << " " << maxDist << " " << distance << std::endl;
-
-	if ( distance <= edgeRadius )
+	if ( Contains( closest ) )
 	{
-		const double edgeHeight = nodeA->height + ( ( nodeB->height - nodeA->height ) * ( closestDistToNodeA / length ) );
-		const double edgePlateau = nodeA->plateau + ( ( nodeB->plateau - nodeA->plateau ) * ( closestDistToNodeA / length ) );
+		const cck::GeoCoord closestCoord = closest.ToGeographic();
+		const double closestDistToNodeA = cck::Distance( nodeA->coord, closestCoord, globeRadius );
+		const double edgeRadius = nodeA->radius + ( ( nodeB->radius - nodeA->radius ) * ( closestDistToNodeA / length ) );
+		const double distance = cck::Distance( sampleCoord, closestCoord, globeRadius );
 
-		if ( distance <= edgePlateau )
+		if ( distance <= edgeRadius )
 		{
-			return edgeHeight;
-		}
-		else
-		{
-			return cck::Globe::CalculateMountainHeight( segmentHeight, edgeHeight, edgeRadius, edgePlateau, distance );
+			const double edgeHeight = nodeA->height + ( ( nodeB->height - nodeA->height ) * ( closestDistToNodeA / length ) );
+			const double edgePlateau = nodeA->plateau + ( ( nodeB->plateau - nodeA->plateau ) * ( closestDistToNodeA / length ) );
+
+			if ( distance <= edgePlateau )
+			{
+				return edgeHeight;
+			}
+			else
+			{
+				return cck::Globe::CalculateMountainHeight( segmentHeight, edgeHeight, edgeRadius, edgePlateau, distance );
+			}
 		}
 	}
+
 	return 0.0;
 }
 
@@ -491,6 +470,7 @@ cck::Globe::BspTree cck::Globe::Triangle::ConstructTree( const double globeRadiu
 		if ( sides[0]->edge->nodeA == segment->baseNode || sides[0]->edge->nodeB == segment->baseNode )
 		{
 			segment->AddEdge( mountainEdges[0] );
+			segment->AddNode( sides[0]->edge->centerNode );
 		}
 	}
 
@@ -515,11 +495,11 @@ cck::Globe::BspTree cck::Globe::Triangle::ConstructTree( const double globeRadiu
     return tempTree;
 }
 
-bool cck::Globe::Triangle::Contains( const cck::Vec3& unitVec ) const
+bool cck::Globe::Triangle::Contains( const cck::Vec3& point ) const
 {
 	for ( const auto& side : sides )
 	{
-		if ( DotProduct( unitVec, side->normal ) < 0.0 )
+		if ( DotProduct( point, side->normal ) < 0.0 )
 		{
 			return false;
 		}
@@ -547,6 +527,8 @@ shared_ptr<cck::Globe::Node> cck::Globe::Triangle::CreateCenterNode() const
 	averageRadius /= 3.0;
 	averagePlateau /= 3.0;
 
+	std::cout << averageHeight << " " << averageRadius << " " << averagePlateau << std::endl;
+
 	return std::make_shared<Node>( averagePosition, averageHeight, averageRadius, averagePlateau );
 }
 
@@ -559,11 +541,11 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Triangle::CreateNodeVector( con
 	return tempVector;
 }
 
-bool cck::Globe::Triangle::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
+bool cck::Globe::Triangle::GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
 {
-	if ( Contains( point ) )
+	if ( Contains( samplePoint ) )
 	{
-		tree.GetData( coord, point, globeRadius, height, id );
+		tree.GetData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
 		return true;
 	}
 
@@ -573,9 +555,9 @@ bool cck::Globe::Triangle::GetData( const cck::GeoCoord& coord, const cck::Vec3&
 
 }
 
-double cck::Globe::Triangle::GetInfluence( const cck::Vec3& point ) const
+double cck::Globe::Triangle::GetInfluence( const cck::Vec3& samplePoint ) const
 {
-	if ( Contains( point ) )
+	if ( Contains( samplePoint ) )
 	{
 		return 1.0;
 	}
@@ -601,13 +583,15 @@ void cck::Globe::Segment::AddNode( const shared_ptr<Node>& newNode )
 	mountainNodes.push_back( newNode );
 }
 
-void cck::Globe::Segment::GetData( const cck::GeoCoord& coord, const cck::Vec3& point, const double globeRadius, double& height, int& id ) const
+void cck::Globe::Segment::GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
 {
+	sampleId = baseNode->id;
+
 	double highest = 0.0;
 
 	for ( const auto& edge : mountainEdges )
 	{
-		double mountainHeight = edge->GetMountainHeight( coord, point, globeRadius, baseNode->height );
+		double mountainHeight = edge->GetMountainHeight( sampleCoord, samplePoint, globeRadius, baseNode->height );
 
 		if ( mountainHeight > highest )
 		{
@@ -619,7 +603,7 @@ void cck::Globe::Segment::GetData( const cck::GeoCoord& coord, const cck::Vec3& 
 	{
 		for ( const auto& node : mountainNodes )
 		{
-			double mountainHeight = node->GetMountainHeight( coord, globeRadius, baseNode->height );
+			double mountainHeight = node->GetMountainHeight( sampleCoord, globeRadius, baseNode->height );
 			if ( mountainHeight > highest )
 			{
 				highest = mountainHeight;
@@ -629,14 +613,12 @@ void cck::Globe::Segment::GetData( const cck::GeoCoord& coord, const cck::Vec3& 
 
 	if ( highest == 0.0 )
 	{
-		height = baseNode->height;
+		sampleHeight = baseNode->height;
 	}
 	else
 	{
-		height = highest;
+		sampleHeight = highest;
 	}
-
-	id = baseNode->id;
 }
 
 cck::Globe::Segment::Segment( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges )
@@ -808,29 +790,32 @@ cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, co
 	return cck::NodeError::SUCCESS;
 }
 
-void cck::Globe::GetData( const double latitude, const double longitude, double& height, int& id ) const
+void cck::Globe::GetData( const double sampleLatitude, const double sampleLongitude, double& sampleHeight, int& sampleId ) const
 {
-	GetData( cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ), height, id );
+	GetData( cck::GeoCoord( sampleLatitude * cck::pi / 180.0, sampleLongitude * cck::pi / 180.0 ), sampleHeight, sampleId );
 }
 
-void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) const	//TODO: rename height in all functions to sampleHeight, and id to sampleId
+void cck::Globe::GetData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const	//TODO: rename height in all functions to sampleHeight, and id to sampleId
 {
-	const cck::Vec3 point = coord.ToCartesian( globeRadius );
-	const double noiseValue = noise.ScaledOctaveNoise( point.x, point.y, point.z, 7, 0.6, 0.0001, 0.0, 1.0 );
+	const cck::Vec3 samplePoint = sampleCoord.ToCartesian( globeRadius );
+	const double noiseValue = noise.ScaledOctaveNoise( samplePoint.x, samplePoint.y, samplePoint.z, 7, 0.6, 0.0001, 0.0, 1.0 );
 
 	if ( noiseValue < seaScale )
 	{
-		height = 0.0;
-		id = -1;
+		sampleHeight = 0.0;
+		sampleId = -1;
 		return;
 	}
 
 	for ( const auto& triangle : triangles )
 	{
-		if ( triangle->GetData( coord, point, globeRadius, height, id ) )
+		double tempHeight = 0.0;
+		int tempId = -1;
+		if ( triangle->GetData( sampleCoord, samplePoint, globeRadius, tempHeight, tempId ) )
 		{
 			double influence = ( noiseValue - seaScale ) / ( 1.0 - seaScale );
-			height *= influence;
+			sampleHeight = tempHeight * influence;
+			sampleId = tempId;
 			return;
 		}
 	}
@@ -841,13 +826,13 @@ void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) 
 
 	for ( const auto& edge : edges )
 	{
-		double influence = edge->GetInfluence( coord, point, globeRadius ) * noiseValue;
+		double influence = edge->GetInfluence( sampleCoord, samplePoint, globeRadius ) * noiseValue;
 		if ( influence >= seaScale )
 		{
 			influence = ( influence - seaScale ) / ( 1.0 - seaScale );
 			double tempHeight = 0.0;
 			int tempId = -1;
-			edge->GetData( coord, point, globeRadius, tempHeight, tempId );
+			edge->GetData( sampleCoord, samplePoint, globeRadius, tempHeight, tempId );
 			tempHeight *= influence;
 			if ( tempHeight > highestHeight )
 			{
@@ -859,7 +844,7 @@ void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) 
 
 	for ( const auto& node : nodes )
 	{
-		double influence = node->GetInfluence( coord, globeRadius ) * noiseValue;
+		double influence = node->GetInfluence( sampleCoord, globeRadius ) * noiseValue;
 		if ( influence >= seaScale )
 		{
 			influence = ( influence - seaScale ) / ( 1.0 - seaScale );
@@ -875,8 +860,8 @@ void cck::Globe::GetData( const cck::GeoCoord& coord, double& height, int& id ) 
 		}
 	}
 
-	height = highestHeight;
-	id = highestId;
+	sampleHeight = highestHeight;
+	sampleId = highestId;
 }
 
 cck::Globe::Globe( const double globeRadius, const unsigned int seed )
