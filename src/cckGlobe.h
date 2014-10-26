@@ -36,15 +36,14 @@ namespace cck
 			{
 			private:
 				shared_ptr<Edge>	edge;
-				shared_ptr<Segment>	segment;
+				shared_ptr<Node>	node;
 				shared_ptr<BspNode>	posChild; //change these two to unique_ptr in C++14
 				shared_ptr<BspNode>	negChild;
 
 			public:
-				bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& edge );
-				bool				AddSegment( std::queue<bool>& coord, const shared_ptr<Segment>& segment );
+				bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge );
+				bool				AddNode( std::queue<bool>& coord, const shared_ptr<Node>& newNode );
 				void				GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
-				//shared_ptr<Segment>	GetSegment( const cck::Vec3& point ) const;
 				bool				IsComplete() const;
 
 			public:
@@ -55,8 +54,8 @@ namespace cck
 			BspNode root;
 
 		public:
-			bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& edge );
-			bool				AddSegment( std::queue<bool>& coord, const shared_ptr<Segment>& segment );
+			bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge );
+			bool				AddNode( std::queue<bool>& coord, const shared_ptr<Node>& newNode ); //TODO: AddNode could be confused with AddChildren; fix
 			void				GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 			bool				IsComplete() const;
 
@@ -67,7 +66,7 @@ namespace cck
 
 
 
-		class Edge: public std::enable_shared_from_this<Edge>
+		class Edge : public std::enable_shared_from_this<Edge>
 		{
 		public:
 			const shared_ptr<Node>		nodeA;
@@ -137,10 +136,11 @@ namespace cck
 
 
 
-		class Node
+		class Node : public std::enable_shared_from_this<Node>
 		{
 		private:
 			vector<shared_ptr<Link>>	links;
+			shared_ptr<Segment>			segment;
 
 		public:
 			const int					id;
@@ -153,11 +153,14 @@ namespace cck
 
 		public:
 			void 						AddLink( const shared_ptr<Link>& newLink );
+			void						AddToSegment( const shared_ptr<Edge>& newEdge ); //TODO: const these?
+			void						AddToSegment( const shared_ptr<Node>& newNode );
 			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node>& refNode );
 			void						GetData( double& sampleHeight, int& sampleId ) const;
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const double globeRadius ) const;
 			shared_ptr<Link>			GetLinkTo( const int targetId ) const;
 			double						GetMountainHeight( const cck::GeoCoord& sampleCoord, const double globeRadius, const double segmentHeight ) const;
+			shared_ptr<Segment>			GetSegment() const;
 			bool						LinkedTo( const int nodeId ) const;
 
 		public:
