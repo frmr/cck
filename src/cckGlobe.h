@@ -43,8 +43,8 @@ namespace cck
 			public:
 				bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge );
 				bool				AddNode( std::queue<bool>& coord, const shared_ptr<Node>& newNode );
-				void				GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 				bool				IsComplete() const;
+				void				SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 
 			public:
 				BspNode();
@@ -56,8 +56,8 @@ namespace cck
 		public:
 			bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge );
 			bool				AddNode( std::queue<bool>& coord, const shared_ptr<Node>& newNode ); //TODO: AddNode could be confused with AddChildren; fix
-			void				GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 			bool				IsComplete() const;
+			void				SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 
 		public:
 			BspTree();
@@ -85,9 +85,9 @@ namespace cck
 
 		public:
 			void						AddSides();
-			void						GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const;
 			double 						GetMountainHeight( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double segmentHeight ) const;
+			void						SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 
 
 		public:
@@ -153,15 +153,15 @@ namespace cck
 
 		public:
 			void 						AddLink( const shared_ptr<Link>& newLink );
-			void						AddToSegment( const shared_ptr<Edge>& newEdge ); //TODO: const these?
+			void						AddToSegment( const shared_ptr<Edge>& newEdge );
 			void						AddToSegment( const shared_ptr<Node>& newNode );
 			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node>& refNode );
-			void						GetData( double& sampleHeight, int& sampleId ) const;
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const double globeRadius ) const;
 			shared_ptr<Link>			GetLinkTo( const int targetId ) const;
 			double						GetMountainHeight( const cck::GeoCoord& sampleCoord, const double globeRadius, const double segmentHeight ) const;
 			shared_ptr<Segment>			GetSegment() const;
 			bool						LinkedTo( const int nodeId ) const;
+			void						SampleData( double& sampleHeight, int& sampleId ) const;
 
 		public:
 			Node( const int id, const cck::GeoCoord& coord, const double height, const double radius, const double globeRadius );	//Node for continent definitions
@@ -188,9 +188,8 @@ namespace cck
 			vector<shared_ptr<Node>>	CreateNodeVector( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC ) const;
 
 		public:
-			bool						GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 			double						GetInfluence( const cck::Vec3& samplePoint ) const;
-			//int		GetNodeId( const cck::GeoCoord& coord, const double globeRadius ) const;
+			bool						SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 
 
 		public:
@@ -203,7 +202,7 @@ namespace cck
 		class Segment
 		{
 		private:
-			vector<shared_ptr<Node>>	mountainNodes;	//TODO: remove this
+			vector<shared_ptr<Node>>	mountainNodes;
 			vector<shared_ptr<Edge>>	mountainEdges;
 
 		public:
@@ -212,7 +211,7 @@ namespace cck
 		public:
 			void AddEdge( const shared_ptr<Edge>& newEdge );
 			void AddNode( const shared_ptr<Node>& newNode );
-			void GetData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
+			void SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
 
 		public:
 			Segment( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges );
@@ -237,12 +236,13 @@ namespace cck
 		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double height, const double nodeRadius );
 		cck::NodeError	AddNode( const int id, const cck::GeoCoord& coord, const double height, const double nodeRadius );
 
-		//shared_ptr<Segment>	CreateLineSegment( const shared_ptr<Node>& baseNode)
-
 		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainHeight, const double mountainRadius, const double mountainPlateau );
 
-		void			GetData( const double sampleLatitude, const double sampleLongitude, double& sampleHeight, int& sampleId ) const;	//TODO: Rename GetData() to SampleData()
-		void			GetData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const;
+		void			SampleData( const double sampleLatitude, const double sampleLongitude, double& sampleHeight, int& sampleId ) const;	//TODO: Rename SampleData() to SampleData()
+		void			SampleData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const;
+
+		void			SampleInfluence( const double sampleLatitude, const double sampleLongitude, double& sampleInfluence ) const;
+		void			SampleInfluence( const cck::GeoCoord& sampleCoord, double& sampleInfluence ) const;
 
 	public:
 		Globe( const double radius, const unsigned int seed );
