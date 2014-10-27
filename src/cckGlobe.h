@@ -228,6 +228,9 @@ namespace cck
 		vector<shared_ptr<Edge>>		edges;
 		vector<shared_ptr<Triangle>>	triangles;
 		const cck::SimplexNoise			noise;
+		int								noiseOctaves;
+		double							noisePersistance;
+		double							noiseFrequency;
 
 	private:
 		static double	CalculateMountainHeight( const double segmentHeight, const double mountainHeight, const double radius, const double plateau, const double distance );
@@ -243,6 +246,8 @@ namespace cck
 
 		void			SampleInfluence( const double sampleLatitude, const double sampleLongitude, double& sampleInfluence ) const;
 		void			SampleInfluence( const cck::GeoCoord& sampleCoord, double& sampleInfluence ) const;
+
+		cck::NoiseError	SetNoiseParameters( const int octaves, const double persistance, const double frequency );
 
 	public:
 		Globe( const double radius, const double seaScale, const unsigned int seed );

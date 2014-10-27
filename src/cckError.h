@@ -24,6 +24,14 @@ namespace cck
 		NODES_ALREADY_LINKED,
 		TRIANGLE_CONFLICT
 	};
+
+	enum class NoiseError
+	{
+		SUCCESS,
+		NON_POSITIVE_OCTAVES,
+		NON_POSITIVE_PERSISTANCE,
+		NON_POSITIVE_FREQUENCY
+	};
 }
 
 #endif // CCK_ERROR_H

@@ -809,7 +809,7 @@ void cck::Globe::SampleData( const double sampleLatitude, const double sampleLon
 void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const	//TODO: rename height in all functions to sampleHeight, and id to sampleId
 {
 	const cck::Vec3 samplePoint = sampleCoord.ToCartesian( globeRadius );
-	const double noiseValue = noise.ScaledOctaveNoise( samplePoint.x, samplePoint.y, samplePoint.z, 7, 0.6, 0.0001, 0.0, 1.0 ); //TODO: Save parameters in Globe with Set methods; check for correct parameter names
+	const double noiseValue = noise.ScaledOctaveNoise( samplePoint.x, samplePoint.y, samplePoint.z, noiseOctaves, noisePersistance, noiseFrequency, 0.0, 1.0 );
 
 	if ( noiseValue < seaScale )
 	{
@@ -919,9 +919,35 @@ void cck::Globe::SampleInfluence( const cck::GeoCoord& sampleCoord, double& samp
 	sampleInfluence = greatestInfluence;
 }
 
+cck::NoiseError	cck::Globe::SetNoiseParameters( const int octaves, const double persistance, const double frequency )
+{
+	if ( octaves <= 0 )
+	{
+		return cck::NoiseError::NON_POSITIVE_OCTAVES;
+	}
+
+	if ( persistance <= 0.0 )
+	{
+		return cck::NoiseError::NON_POSITIVE_PERSISTANCE;
+	}
+
+	if ( frequency <= 0.0 )
+	{
+		return cck::NoiseError::NON_POSITIVE_FREQUENCY;
+	}
+
+	noiseOctaves = octaves;
+	noisePersistance = persistance;
+	noiseFrequency = frequency;
+	return cck::NoiseError::SUCCESS;
+}
+
 cck::Globe::Globe( const double globeRadius, const double seaScale, const unsigned int seed )
 	:	globeRadius( globeRadius ),
 		seaScale( ( seaScale < 0.0 || seaScale > 1.0 ) ? 0.4 : seaScale ),
-		noise( seed )
+		noise( seed ),
+		noiseOctaves( 7 ),
+		noisePersistance( 0.6 ),
+		noiseFrequency( 0.0001 )
 {
 }
