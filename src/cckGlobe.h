@@ -245,7 +245,7 @@ namespace cck
 		void			SampleInfluence( const cck::GeoCoord& sampleCoord, double& sampleInfluence ) const;
 
 	public:
-		Globe( const double radius, const unsigned int seed );
+		Globe( const double radius, const double seaScale, const unsigned int seed );
 	};
 }
 #endif // CCK_GLOBE_H
