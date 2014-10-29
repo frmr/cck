@@ -238,6 +238,7 @@ namespace cck
 		int								noiseOctaves;
 		double							noisePersistance;
 		double							noiseFrequency;
+		double							influenceFactor;
 
 	private:
 		static double	CalculateMountainHeight( const double segmentHeight, const double mountainHeight, const double radius, const double plateau, const double distance );
@@ -254,6 +255,7 @@ namespace cck
 		void			SampleInfluence( const double sampleLatitude, const double sampleLongitude, double& sampleInfluence ) const;
 		void			SampleInfluence( const cck::GeoCoord& sampleCoord, double& sampleInfluence ) const;
 
+		void			SetInfluenceFactor( const double newInfluenceFactor );
 		cck::NoiseError	SetNoiseParameters( const int octaves, const double persistance, const double frequency );
 
 	public:

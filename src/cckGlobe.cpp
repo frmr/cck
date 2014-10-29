@@ -395,7 +395,8 @@ double cck::Globe::Node::GetInfluence( const cck::GeoCoord& sampleCoord, const d
 	const double distance = cck::Distance( coord, sampleCoord, globeRadius );
 	if ( distance <= radius )
 	{
-		return 1.0 - ( distance / radius );
+		double fraction = distance / radius;
+		return 1.0 - ( fraction * fraction );
 	}
 	return 0.0;
 }
@@ -749,22 +750,10 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 						{
 							side->edge->negativeMountain->SetInactive();
 						}
-
-						//set one of side->edge's mountain edges to inactive
-						//for node in side->edge
-						//	for edge in node->GetSegment
-						//		if edge uses center node
-						//			if dot( other node, side->normal )
-						//				set to inactive
-
-						//auto checkNode = side->edge->nodeA;
-
-
 					}
 				}
 			}
 		}
-
 		triangles.push_back( std::make_shared<Triangle>( nodePtrA, nodePtrB, neighbor, commonSides, globeRadius ) );
 	}
 
@@ -948,6 +937,11 @@ void cck::Globe::SampleInfluence( const cck::GeoCoord& sampleCoord, double& samp
 	sampleInfluence = greatestInfluence;
 }
 
+void cck::Globe::SetInfluenceFactor( const double newInfluenceFactor )
+{
+	influenceFactor = newInfluenceFactor;
+}
+
 cck::NoiseError	cck::Globe::SetNoiseParameters( const int octaves, const double persistance, const double frequency )
 {
 	if ( octaves <= 0 )
@@ -977,6 +971,7 @@ cck::Globe::Globe( const double globeRadius, const double seaScale, const unsign
 		noise( seed ),
 		noiseOctaves( 7 ),
 		noisePersistance( 0.6 ),
-		noiseFrequency( 0.0001 )
+		noiseFrequency( 0.0001 ),
+		influenceFactor( 1.0 )
 {
 }
