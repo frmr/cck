@@ -68,7 +68,12 @@ namespace cck
 
 		class Edge : public std::enable_shared_from_this<Edge>
 		{
+		private:
+			bool						active;
+
 		public:
+			shared_ptr<Edge>			positiveMountain;
+			shared_ptr<Edge>			negativeMountain;
 			const shared_ptr<Node>		nodeA;
 			const shared_ptr<Node>		nodeB;
 			const double				length;
@@ -79,7 +84,7 @@ namespace cck
 
 		private:
 			cck::Vec3					ClosestPoint( const cck::Vec3& samplePoint ) const;
-			BspTree						ConstructTree( const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius ) const;
+			BspTree						ConstructTree( const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius );
 			bool						Contains( const cck::Vec3& point ) const;
 			bool						PointOnFreeSide( const cck::Vec3& samplePoint ) const;
 
@@ -87,7 +92,9 @@ namespace cck
 			void						AddSides();
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const;
 			double 						GetMountainHeight( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double segmentHeight ) const;
+			bool						IsActive() const;
 			void						SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const;
+			void						SetInactive();
 
 
 		public:

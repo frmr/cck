@@ -160,32 +160,32 @@ cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& samplePoint ) const
 	return cck::Vec3( samplePoint - normal * cck::DotProduct( normal, samplePoint ) );
 }
 
-cck::Globe::BspTree cck::Globe::Edge::ConstructTree( const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius ) const
+cck::Globe::BspTree cck::Globe::Edge::ConstructTree( const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius )
 {
 	//construct nodes either side of center node
 	const auto positiveNode = std::make_shared<Node>( centerNode->position + normal * globeRadius, mountainHeight, mountainRadius, mountainPlateau );
 	const auto negativeNode = std::make_shared<Node>( centerNode->position - normal * globeRadius, mountainHeight, mountainRadius, mountainPlateau );
 
-	const auto positiveEdge = std::make_shared<Edge>( centerNode, positiveNode, globeRadius );
-	const auto negativeEdge = std::make_shared<Edge>( centerNode, negativeNode, globeRadius );
+	positiveMountain = std::make_shared<Edge>( centerNode, positiveNode, globeRadius );
+	negativeMountain = std::make_shared<Edge>( centerNode, negativeNode, globeRadius );
 
 	//construct BspTree
 	BspTree tempTree;
 	std::queue<bool> coord;
-	tempTree.AddChildren( coord, positiveEdge );
+	tempTree.AddChildren( coord, positiveMountain );
 
-	const bool nodeDotProduct = cck::DotProduct( positiveEdge->normal, nodeA->unitVec ) >= 0.0;
+	const bool nodeDotProduct = cck::DotProduct( positiveMountain->normal, nodeA->unitVec ) >= 0.0;
 
 	coord.push( nodeDotProduct );
 	tempTree.AddNode( coord, nodeA );
-	//nodeA->AddToSegment( positiveEdge );
-	//nodeA->AddToSegment( negativeEdge );
+	nodeA->AddToSegment( positiveMountain );
+	nodeA->AddToSegment( negativeMountain );
 	nodeA->AddToSegment( centerNode );
 
 	coord.push( !nodeDotProduct );
 	tempTree.AddNode( coord, nodeB );
-	//nodeB->AddToSegment( positiveEdge );
-	//nodeB->AddToSegment( negativeEdge );
+	nodeB->AddToSegment( positiveMountain );
+	nodeB->AddToSegment( negativeMountain );
 	nodeB->AddToSegment( centerNode );
 
 	return tempTree;
@@ -246,7 +246,8 @@ double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& sampleCoord, const c
 			const double distance = cck::Distance( sampleCoord, closestCoord, globeRadius );
 			if ( distance <= maxDist )
 			{
-				return 1.0 - ( distance / maxDist );
+				double fraction = distance / maxDist;
+				return 1.0 - ( fraction * fraction );
 			}
 		}
 	}
@@ -283,13 +284,26 @@ double cck::Globe::Edge::GetMountainHeight( const cck::GeoCoord& sampleCoord, co
 	return 0.0;
 }
 
+bool cck::Globe::Edge::IsActive() const
+{
+	return active;
+}
+
 void cck::Globe::Edge::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
 {
 	tree.SampleData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
 }
 
+void cck::Globe::Edge::SetInactive()
+{
+	active = false;
+}
+
 cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double mountainHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius )
-	:	nodeA( nodeA ),
+	:	active( true ),
+		positiveMountain( nullptr ),
+		negativeMountain( nullptr ),
+		nodeA( nodeA ),
 		nodeB( nodeB ),
 		length( cck::Distance( nodeA->coord, nodeB->coord, globeRadius ) ),
 		centerNode( std::make_shared<Node>( ( nodeA->coord.ToCartesian( globeRadius ) + nodeB->coord.ToCartesian( globeRadius ) ) * 0.5f , mountainHeight, mountainRadius, mountainPlateau ) ),
@@ -299,7 +313,10 @@ cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& n
 }
 
 cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const double globeRadius )
-	:	nodeA( nodeA ),
+	:	active( true ),
+		positiveMountain( nullptr ),
+		negativeMountain( nullptr ),
+		nodeA( nodeA ),
 		nodeB( nodeB ),
 		length( cck::Distance( nodeA->coord, nodeB->coord, globeRadius ) ),
 		centerNode( nullptr ), //mountain Edge has no center Node
@@ -590,11 +607,14 @@ void cck::Globe::Segment::SampleData( const cck::GeoCoord& sampleCoord, const cc
 
 	for ( const auto& edge : mountainEdges )
 	{
-		double mountainHeight = edge->GetMountainHeight( sampleCoord, samplePoint, globeRadius, baseNode->height );
-
-		if ( mountainHeight > highest )
+		if ( edge->IsActive() )
 		{
-			highest = mountainHeight;
+			double mountainHeight = edge->GetMountainHeight( sampleCoord, samplePoint, globeRadius, baseNode->height );
+
+			if ( mountainHeight > highest )
+			{
+				highest = mountainHeight;
+			}
 		}
 	}
 
@@ -720,6 +740,15 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 					{
 						side->SetFormsTriangle();
 						commonSides.push_back( side );
+
+						if ( cck::DotProduct( side->edge->normal, average ) >= 0.0 )
+						{
+							side->edge->positiveMountain->SetInactive();
+						}
+						else
+						{
+							side->edge->negativeMountain->SetInactive();
+						}
 
 						//set one of side->edge's mountain edges to inactive
 						//for node in side->edge
