@@ -824,12 +824,12 @@ void cck::Globe::SampleData( const double sampleLatitude, const double sampleLon
 	SampleData( cck::GeoCoord( sampleLatitude * cck::pi / 180.0, sampleLongitude * cck::pi / 180.0 ), sampleHeight, sampleId );
 }
 
-void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const	//TODO: rename height in all functions to sampleHeight, and id to sampleId
+void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const
 {
 	const cck::Vec3 samplePoint = sampleCoord.ToCartesian( globeRadius );
 	const double noiseValue = noise.ScaledOctaveNoise( samplePoint.x, samplePoint.y, samplePoint.z, noiseOctaves, noisePersistance, noiseFrequency, 0.0, 1.0 );
 
-	if ( noiseValue < seaScale )
+	if ( noiseValue * influenceFactor < seaScale )
 	{
 		sampleHeight = 0.0;
 		sampleId = -1;

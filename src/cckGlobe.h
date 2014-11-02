@@ -249,7 +249,7 @@ namespace cck
 
 		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainHeight, const double mountainRadius, const double mountainPlateau );
 
-		void			SampleData( const double sampleLatitude, const double sampleLongitude, double& sampleHeight, int& sampleId ) const;	//TODO: Rename SampleData() to SampleData()
+		void			SampleData( const double sampleLatitude, const double sampleLongitude, double& sampleHeight, int& sampleId ) const;
 		void			SampleData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const;
 
 		void			SampleInfluence( const double sampleLatitude, const double sampleLongitude, double& sampleInfluence ) const;
