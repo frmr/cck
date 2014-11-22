@@ -7,17 +7,44 @@
 #include <map>
 #include <iostream> //TODO: Remove this
 
-cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainHeight, const double mountainRadius, const double mountainPlateau )
+double cck::Globe::CalculateMountainHeight( const double segmentHeight, const double mountainHeight, const double radius, const double plateau, const double distance )
 {
-	if ( nodeIdA < 0 || nodeIdB < 0 )
+	//return segmentHeight + ( ( mountainHeight - segmentHeight ) * ( sin( ( ( cck::pi * ( 1.0 - ( ( distance - plateau ) / ( radius - plateau ) ) ) ) - cck::halfPi ) ) + 1.0 ) / 2.0 );
+	return segmentHeight + ( 1.0 - ( ( distance - plateau ) / ( radius - plateau ) ) ) * ( mountainHeight - segmentHeight );
+}
+
+cck::NodeError cck::Globe::AddNode( const int id, const double latitude, const double longitude, const double minHeight, const double maxHeight, const double nodeRadius )
+{
+	return AddNode( id, cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ), minHeight, maxHeight, nodeRadius );
+}
+
+cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, const double minHeight, const double maxHeight, const double nodeRadius )
+{
+	if ( id < 0 )
 	{
-		return cck::LinkError::NEGATIVE_ID;
+		return cck::NodeError::NEGATIVE_ID;
 	}
 
-	if ( nodeIdA == nodeIdB )
+	for ( const auto& nodeIt : nodes )
 	{
-		return cck::LinkError::DUPLICATE_ID;
+		if ( nodeIt->id == id )	return cck::NodeError::ID_ALREADY_IN_USE;
 	}
+
+	if ( coord.latRadians < -cck::halfPi || coord.latRadians > cck::halfPi )	return cck::NodeError::LATITUDE_OUT_OF_RANGE;
+	if ( coord.lonRadians < -cck::pi || coord.lonRadians > cck::pi )			return cck::NodeError::LONGITUDE_OUT_OF_RANGE;
+
+	if ( nodeRadius < 0.0 )							return cck::NodeError::NEGATIVE_RADIUS;
+	else if ( nodeRadius > cck::pi * globeRadius )	return cck::NodeError::DIAMETER_EXCEEDS_SPHERE_CIRCUMFERENCE;
+
+	nodes.push_back( std::make_shared<Node>( id, coord, minHeight, maxHeight, nodeRadius, globeRadius ) );
+
+	return cck::NodeError::SUCCESS;
+}
+
+cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainMinHeight, const double mountainMaxHeight, const double mountainRadius, const double mountainPlateau )
+{
+	if ( nodeIdA < 0 || nodeIdB < 0 )	return cck::LinkError::NEGATIVE_ID;
+	if ( nodeIdA == nodeIdB )			return cck::LinkError::DUPLICATE_ID;
 
 	shared_ptr<Node> nodePtrA( nullptr );
 	shared_ptr<Node> nodePtrB( nullptr );
@@ -28,25 +55,13 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 		{
 			if ( nodeIt->id == nodeIdA )
 			{
-				if ( nodeIt->LinkedTo( nodeIdB ) )
-				{
-					return cck::LinkError::NODES_ALREADY_LINKED;
-				}
-				else
-				{
-					nodePtrA = nodeIt;
-				}
+				if ( nodeIt->LinkedTo( nodeIdB ) )	return cck::LinkError::NODES_ALREADY_LINKED;
+				else								nodePtrA = nodeIt;
 			}
 			else if ( nodeIt->id == nodeIdB )
 			{
-				if ( nodeIt->LinkedTo( nodeIdA ) )
-				{
-					return cck::LinkError::NODES_ALREADY_LINKED;
-				}
-				else
-				{
-					nodePtrB = nodeIt;
-				}
+				if ( nodeIt->LinkedTo( nodeIdA ) )	return cck::LinkError::NODES_ALREADY_LINKED;
+				else								nodePtrB = nodeIt;
 			}
 		}
 		else
@@ -61,7 +76,7 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 	}
 
 	//Create temporary edge to test new Triangles
-	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, mountainHeight, mountainRadius, mountainPlateau, globeRadius ) );
+	shared_ptr<Edge> tempEdge( new Edge( nodePtrA, nodePtrB, mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau, globeRadius ) );
 	tempEdge->AddSides();
 
 	//Search for common neighbors of nodeA and nodeB that form a Triangle
@@ -118,61 +133,6 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 	return cck::LinkError::SUCCESS;
 }
 
-double cck::Globe::CalculateMountainHeight( const double segmentHeight, const double mountainHeight, const double radius, const double plateau, const double distance )
-{
-	//return segmentHeight + ( ( mountainHeight - segmentHeight ) * ( sin( ( ( cck::pi * ( 1.0 - ( ( distance - plateau ) / ( radius - plateau ) ) ) ) - cck::halfPi ) ) + 1.0 ) / 2.0 );
-	return segmentHeight + ( 1.0 - ( ( distance - plateau ) / ( radius - plateau ) ) ) * ( mountainHeight - segmentHeight );
-}
-
-cck::NodeError cck::Globe::AddNode( const int id, const double latitude, const double longitude, const double height, const double nodeRadius )
-{
-	return AddNode( id, cck::GeoCoord( latitude * cck::pi / 180.0, longitude * cck::pi / 180.0 ), height, nodeRadius );
-}
-
-cck::NodeError cck::Globe::AddNode( const int id, const cck::GeoCoord& coord, const double height, const double nodeRadius )
-{
-	if ( id < 0 )
-	{
-		return cck::NodeError::NEGATIVE_ID;
-	}
-
-	for ( const auto& nodeIt : nodes )
-	{
-		if ( nodeIt->id == id )
-		{
-			return cck::NodeError::ID_ALREADY_IN_USE;
-		}
-	}
-
-	if ( coord.latRadians < -cck::halfPi || coord.latRadians > cck::halfPi )
-	{
-		return cck::NodeError::LATITUDE_OUT_OF_RANGE;
-	}
-
-	if ( coord.lonRadians < -cck::pi || coord.lonRadians > cck::pi )
-	{
-		return cck::NodeError::LONGITUDE_OUT_OF_RANGE;
-	}
-
-	if ( height < 0.0 )
-	{
-		return cck::NodeError::NEGATIVE_HEIGHT;
-	}
-
-	if ( nodeRadius < 0.0 )
-	{
-		return cck::NodeError::NEGATIVE_RADIUS;
-	}
-	else if ( nodeRadius > cck::pi * globeRadius )
-	{
-		return cck::NodeError::DIAMETER_EXCEEDS_SPHERE_CIRCUMFERENCE;
-	}
-
-	nodes.push_back( std::make_shared<Node>( id, coord, height, nodeRadius, globeRadius ) );
-
-	return cck::NodeError::SUCCESS;
-}
-
 void cck::Globe::SampleData( const double sampleLatitude, const double sampleLongitude, double& sampleHeight, int& sampleId ) const
 {
 	SampleData( cck::GeoCoord( sampleLatitude * cck::pi / 180.0, sampleLongitude * cck::pi / 180.0 ), sampleHeight, sampleId );
@@ -183,41 +143,34 @@ void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHei
 	const cck::Vec3 samplePoint = sampleCoord.ToCartesian( globeRadius );
 	const double noiseValue = noise.ScaledOctaveNoise( samplePoint.x, samplePoint.y, samplePoint.z, noiseOctaves, noisePersistance, noiseFrequency, 0.0, 1.0 );
 
-	if ( noiseValue * influenceFactor < seaScale )
-	{
-		sampleHeight = 0.0;
-		sampleId = -1;
-		return;
-	}
+//	if ( noiseValue * influenceFactor < seaScale )
+//	{
+//		sampleHeight = 0.0;
+//		sampleId = -1;
+//		return;
+//	}
 
 	for ( const auto& triangle : triangles )
 	{
-		double tempHeight = 0.0;
-		int tempId = -1;
-		if ( triangle->SampleData( sampleCoord, samplePoint, globeRadius, tempHeight, tempId ) )
+		if ( triangle->SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, sampleHeight, sampleId ) )
 		{
-			double influence = ( noiseValue - seaScale ) / ( 1.0 - seaScale );
-			sampleHeight = tempHeight * influence;
-			sampleId = tempId;
 			return;
 		}
 	}
 
-
-	double highestHeight = 0.0;
+	double highestHeight = std::numeric_limits<double>::min();
 	int highestId = -1;
 
 	for ( const auto& edge : edges )
 	{
-		double influence = edge->GetInfluence( sampleCoord, samplePoint, globeRadius ) * noiseValue;
-		if ( influence >= seaScale )
+		double tempHeight = 0.0;
+		int tempId = -1;
+		edge->SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, tempHeight, tempId );
+
+		//if ( tempHeight > 0.0 )
 		{
-			influence = ( influence - seaScale ) / ( 1.0 - seaScale );
-			double tempHeight = 0.0;
-			int tempId = -1;
-			edge->SampleData( sampleCoord, samplePoint, globeRadius, tempHeight, tempId );
-			tempHeight *= influence;
-			if ( tempHeight > highestHeight )
+			tempHeight *= edge->GetInfluence( sampleCoord, samplePoint, globeRadius );
+			if ( tempHeight >= highestHeight )
 			{
 				highestHeight = tempHeight;
 				highestId = tempId;
@@ -227,15 +180,14 @@ void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHei
 
 	for ( const auto& node : nodes )
 	{
-		double influence = node->GetInfluence( sampleCoord, globeRadius ) * noiseValue;
-		if ( influence >= seaScale )
+		double tempHeight = 0.0;
+		int tempId = -1;
+		node->SampleData( sampleCoord, globeRadius, noiseValue, tempHeight, tempId );
+
+		//if ( tempHeight > 0.0 )
 		{
-			influence = ( influence - seaScale ) / ( 1.0 - seaScale );
-			double tempHeight = 0.0;
-			int tempId = -1;
-			node->SampleData( tempHeight, tempId );
-			tempHeight *= influence;
-			if ( tempHeight > highestHeight )
+			tempHeight *= node->GetInfluence( sampleCoord, globeRadius );
+			if ( tempHeight >= highestHeight )
 			{
 				highestHeight = tempHeight;
 				highestId = tempId;
@@ -261,7 +213,7 @@ void cck::Globe::SampleInfluence( const cck::GeoCoord& sampleCoord, double& samp
 	{
 		double tempHeight = 0.0;
 		int tempId = -1;
-		if ( triangle->SampleData( sampleCoord, samplePoint, globeRadius, tempHeight, tempId ) )
+		if ( triangle->SampleData( sampleCoord, samplePoint, globeRadius, 1.0f, tempHeight, tempId ) )
 		{
 			sampleInfluence = 1.0;
 			return;
@@ -298,20 +250,9 @@ void cck::Globe::SetInfluenceFactor( const double newInfluenceFactor )
 
 cck::NoiseError	cck::Globe::SetNoiseParameters( const int octaves, const double persistance, const double frequency )
 {
-	if ( octaves <= 0 )
-	{
-		return cck::NoiseError::NON_POSITIVE_OCTAVES;
-	}
-
-	if ( persistance <= 0.0 )
-	{
-		return cck::NoiseError::NON_POSITIVE_PERSISTANCE;
-	}
-
-	if ( frequency <= 0.0 )
-	{
-		return cck::NoiseError::NON_POSITIVE_FREQUENCY;
-	}
+	if ( octaves <= 0 )			return cck::NoiseError::NON_POSITIVE_OCTAVES;
+	if ( persistance <= 0.0 )	return cck::NoiseError::NON_POSITIVE_PERSISTANCE;
+	if ( frequency <= 0.0 )		return cck::NoiseError::NON_POSITIVE_FREQUENCY;
 
 	noiseOctaves = octaves;
 	noisePersistance = persistance;
@@ -319,9 +260,10 @@ cck::NoiseError	cck::Globe::SetNoiseParameters( const int octaves, const double 
 	return cck::NoiseError::SUCCESS;
 }
 
-cck::Globe::Globe( const double globeRadius, const double seaScale, const unsigned int seed )
+cck::Globe::Globe( const double globeRadius, const double seaLevel, const unsigned int seed )
 	:	globeRadius( globeRadius ),
-		seaScale( ( seaScale < 0.0 || seaScale > 1.0 ) ? 0.4 : seaScale ),
+		//seaScale( ( seaScale < 0.0 || seaScale > 1.0 ) ? 0.4 : seaScale ),
+		seaLevel( seaLevel ),
 		noise( seed ),
 		noiseOctaves( 7 ),
 		noisePersistance( 0.6 ),

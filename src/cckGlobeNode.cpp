@@ -61,18 +61,20 @@ shared_ptr<cck::Globe::Link> cck::Globe::Node::GetLinkTo( const int targetId ) c
 	return nullptr;
 }
 
-double cck::Globe::Node::GetMountainHeight( const cck::GeoCoord& sampleCoord, const double globeRadius, const double segmentHeight ) const
+double cck::Globe::Node::GetMountainHeight( const cck::GeoCoord& sampleCoord, const double globeRadius, const double noiseValue, const double segmentHeight ) const
 {
 	const double distance = cck::Distance( coord, sampleCoord, globeRadius );
 
 	if ( distance <= radius )
 	{
+		const double height = minHeight + noiseValue * ( maxHeight - minHeight );
 		if ( distance <= plateau )
 		{
 			return height;
 		}
 		else
 		{
+
 			return cck::Globe::CalculateMountainHeight( segmentHeight, height, radius, plateau, distance );
 		}
 	}
@@ -96,31 +98,34 @@ bool cck::Globe::Node::LinkedTo( const int nodeId ) const
 	return false;
 }
 
-void cck::Globe::Node::SampleData( double& sampleHeight, int& sampleId ) const
+void cck::Globe::Node::SampleData( const cck::GeoCoord& sampleCoord, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const
 {
-	sampleHeight = height;
+	//sampleHeight = minHeight + ( noiseValue * GetInfluence( sampleCoord, globeRadius ) ) * ( maxHeight - minHeight );
+	sampleHeight = minHeight + noiseValue * ( maxHeight - minHeight );
 	sampleId = id;
 }
 
-cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const double height, const double radius, const double globeRadius )
+cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const double minHeight, const double maxHeight, const double radius, const double globeRadius )
 	:	segment( nullptr ),
 		id( id ),
 		coord( coord ),
 		position( coord.ToCartesian( globeRadius ) ),
 		unitVec( position.Unit() ),
-		height( height ),
+		minHeight( minHeight ),
+		maxHeight( maxHeight ),
 		radius( radius ),
 		plateau( 0.0 )
 {
 }
 
-cck::Globe::Node::Node( const cck::Vec3& position, const double height, const double radius, const double plateau )
+cck::Globe::Node::Node( const cck::Vec3& position, const double minHeight, const double maxHeight, const double radius, const double plateau )
 	:	segment( nullptr ),
 		id( -1 ),
 		coord( position.ToGeographic() ),
 		position( position ),
 		unitVec( position.Unit() ),
-		height( height ),
+		minHeight( minHeight ),
+		maxHeight( maxHeight ),
 		radius( radius ),
 		plateau( plateau )
 {

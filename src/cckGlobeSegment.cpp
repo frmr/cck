@@ -10,9 +10,10 @@ void cck::Globe::Segment::AddNode( const shared_ptr<Node>& newNode )
 	mountainNodes.push_back( newNode );
 }
 
-void cck::Globe::Segment::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
+void cck::Globe::Segment::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const
 {
 	sampleId = baseNode->id;
+	const double segmentHeight = baseNode->minHeight + noiseValue * ( baseNode->maxHeight - baseNode->minHeight );
 
 	double highest = 0.0;
 
@@ -20,7 +21,7 @@ void cck::Globe::Segment::SampleData( const cck::GeoCoord& sampleCoord, const cc
 	{
 		if ( edge->IsActive() )
 		{
-			double mountainHeight = edge->GetMountainHeight( sampleCoord, samplePoint, globeRadius, baseNode->height );
+			const double mountainHeight = edge->GetMountainHeight( sampleCoord, samplePoint, globeRadius, noiseValue, segmentHeight );
 
 			if ( mountainHeight > highest )
 			{
@@ -33,7 +34,8 @@ void cck::Globe::Segment::SampleData( const cck::GeoCoord& sampleCoord, const cc
 	{
 		for ( const auto& node : mountainNodes )
 		{
-			double mountainHeight = node->GetMountainHeight( sampleCoord, globeRadius, baseNode->height );
+			const double mountainHeight = node->GetMountainHeight( sampleCoord, globeRadius, noiseValue, segmentHeight );
+
 			if ( mountainHeight > highest )
 			{
 				highest = mountainHeight;
@@ -41,14 +43,7 @@ void cck::Globe::Segment::SampleData( const cck::GeoCoord& sampleCoord, const cc
 		}
 	}
 
-	if ( highest == 0.0 )
-	{
-		sampleHeight = baseNode->height;
-	}
-	else
-	{
-		sampleHeight = highest;
-	}
+	sampleHeight = ( highest == 0.0 ) ? segmentHeight : highest;
 }
 
 cck::Globe::Segment::Segment( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges )

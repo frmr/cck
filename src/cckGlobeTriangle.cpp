@@ -56,23 +56,26 @@ shared_ptr<cck::Globe::Node> cck::Globe::Triangle::CreateCenterNode() const
 {
 	//average node properties
 	cck::Vec3 averagePosition;
-	double averageHeight = 0.0;
+	double averageMinHeight = 0.0;
+	double averageMaxHeight = 0.0;
 	double averageRadius = 0.0;
 	double averagePlateau = 0.0;
 
 	for ( const auto& side : sides )
 	{
 		averagePosition += side->edge->centerNode->position;
-		averageHeight += side->edge->centerNode->height;
+		averageMinHeight += side->edge->centerNode->minHeight;
+		averageMaxHeight += side->edge->centerNode->maxHeight;
 		averageRadius += side->edge->centerNode->radius;
 		averagePlateau += side->edge->centerNode->plateau;
 	}
 	averagePosition /= 3.0;
-	averageHeight /= 3.0;
+	averageMinHeight /= 3.0;
+	averageMaxHeight /= 3.0;
 	averageRadius /= 3.0;
 	averagePlateau /= 3.0;
 
-	return std::make_shared<Node>( averagePosition, averageHeight, averageRadius, averagePlateau );
+	return std::make_shared<Node>( averagePosition, averageMinHeight, averageMaxHeight, averageRadius, averagePlateau );
 }
 
 vector<shared_ptr<cck::Globe::Node>> cck::Globe::Triangle::CreateNodeVector( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC ) const
@@ -93,11 +96,11 @@ double cck::Globe::Triangle::GetInfluence( const cck::Vec3& samplePoint ) const
 	return 0.0;
 }
 
-bool cck::Globe::Triangle::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
+bool cck::Globe::Triangle::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const
 {
 	if ( Contains( samplePoint ) )
 	{
-		tree.SampleData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
+		tree.SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, sampleHeight, sampleId );
 		return true;
 	}
 

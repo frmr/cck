@@ -98,22 +98,22 @@ bool cck::Globe::BspTree::BspNode::IsComplete() const
 	}
 }
 
-void cck::Globe::BspTree::BspNode::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
+void cck::Globe::BspTree::BspNode::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const
 {
 	if ( node == nullptr )
 	{
 		if ( cck::DotProduct( edge->normal, samplePoint ) >= 0.0 )
 		{
-			return posChild->SampleData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
+			return posChild->SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, sampleHeight, sampleId );
 		}
 		else
 		{
-			return negChild->SampleData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
+			return negChild->SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, sampleHeight, sampleId );
 		}
 	}
 	else
 	{
-		node->GetSegment()->SampleData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
+		node->GetSegment()->SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, sampleHeight, sampleId );
 	}
 }
 
@@ -140,9 +140,9 @@ bool cck::Globe::BspTree::IsComplete() const
 	return root.IsComplete();
 }
 
-void cck::Globe::BspTree::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
+void cck::Globe::BspTree::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const
 {
-	root.SampleData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
+	root.SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, sampleHeight, sampleId );
 }
 
 cck::Globe::BspTree::BspTree()
