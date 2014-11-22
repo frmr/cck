@@ -1,0 +1,113 @@
+#include "cckGlobe.h"
+#include "cckMath.h"
+
+cck::Globe::BspTree cck::Globe::Triangle::ConstructTree( const double globeRadius ) const
+{
+	vector<shared_ptr<Edge>> mountainEdges;
+	//create Edges between triangles's center node and each side's center node
+	for ( const auto& side : sides )
+	{
+		const auto newMountainEdge = std::make_shared<Edge>( centerNode, side->edge->centerNode, globeRadius );
+		mountainEdges.push_back( newMountainEdge );
+		side->edge->nodeA->AddToSegment( newMountainEdge ); //TODO: Only add the new edge to one segment; check with dot product against tangent
+		side->edge->nodeB->AddToSegment( newMountainEdge );
+	}
+
+    BspTree tempTree;
+    std::queue<bool> coord;
+    tempTree.AddChildren( coord, mountainEdges[0] ); //TODO: Use iterators
+
+    bool dotNode1 = cck::DotProduct( mountainEdges[0]->normal, sides[1]->edge->centerNode->unitVec ) >= 0.0;
+	coord.push( dotNode1 );
+    tempTree.AddChildren( coord, mountainEdges[1] );
+
+    coord.push( !dotNode1 );
+    tempTree.AddChildren( coord, mountainEdges[2] );
+
+	for ( int sideIndex = 1; sideIndex < 3; sideIndex++ )
+	{
+		for ( const auto& node : nodes )
+		{
+			if ( node->id == sides[sideIndex]->edge->nodeA->id || node->id == sides[sideIndex]->edge->nodeB->id )
+			{
+				coord.push( ( sideIndex == 1 ) ? dotNode1 : !dotNode1 );
+				coord.push( cck::DotProduct( mountainEdges[sideIndex]->normal, node->unitVec ) >= 0.0 );
+				tempTree.AddNode( coord, node );
+			}
+		}
+	}
+
+    return tempTree;
+}
+
+bool cck::Globe::Triangle::Contains( const cck::Vec3& point ) const
+{
+	for ( const auto& side : sides )
+	{
+		if ( DotProduct( point, side->normal ) < 0.0 )
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+shared_ptr<cck::Globe::Node> cck::Globe::Triangle::CreateCenterNode() const
+{
+	//average node properties
+	cck::Vec3 averagePosition;
+	double averageHeight = 0.0;
+	double averageRadius = 0.0;
+	double averagePlateau = 0.0;
+
+	for ( const auto& side : sides )
+	{
+		averagePosition += side->edge->centerNode->position;
+		averageHeight += side->edge->centerNode->height;
+		averageRadius += side->edge->centerNode->radius;
+		averagePlateau += side->edge->centerNode->plateau;
+	}
+	averagePosition /= 3.0;
+	averageHeight /= 3.0;
+	averageRadius /= 3.0;
+	averagePlateau /= 3.0;
+
+	return std::make_shared<Node>( averagePosition, averageHeight, averageRadius, averagePlateau );
+}
+
+vector<shared_ptr<cck::Globe::Node>> cck::Globe::Triangle::CreateNodeVector( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC ) const
+{
+	vector<shared_ptr<Node>> tempVector;
+	tempVector.push_back( nodeA );
+	tempVector.push_back( nodeB );
+	tempVector.push_back( nodeC );
+	return tempVector;
+}
+
+double cck::Globe::Triangle::GetInfluence( const cck::Vec3& samplePoint ) const
+{
+	if ( Contains( samplePoint ) )
+	{
+		return 1.0;
+	}
+	return 0.0;
+}
+
+bool cck::Globe::Triangle::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, double& sampleHeight, int& sampleId ) const
+{
+	if ( Contains( samplePoint ) )
+	{
+		tree.SampleData( sampleCoord, samplePoint, globeRadius, sampleHeight, sampleId );
+		return true;
+	}
+
+	return false;
+}
+
+cck::Globe::Triangle::Triangle( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC, const vector<shared_ptr<Side>>& sides, const double globeRadius )
+	:	nodes( CreateNodeVector( nodeA, nodeB, nodeC ) ),
+		sides( sides ),
+		centerNode( CreateCenterNode() ),
+		tree( ConstructTree( globeRadius ) )
+{
+}
