@@ -12,8 +12,8 @@ using namespace std;
 
 int main()
 {
-	int xRes = 512;
-	int yRes = 256;
+	int xRes = 1024;
+	int yRes = 512;
 
 	int seed = time(NULL);
 	srand(seed);
@@ -76,6 +76,7 @@ int main()
 	globe.LinkNodes( 1,		3,	0.75,	150.0,	50.0 );	//France, Germany
 	globe.LinkNodes( 1,		4,	5.0,	150.0,	50.0 ); //France, Italy
 	globe.LinkNodes( 4,		2,	0.75,	150.0,	50.0 ); //Italy, Iberia
+	globe.LinkNodes( 4,		7,	0.75,	150.0,	50.0 ); //Italy, Balkans
 	globe.LinkNodes( 3,		4,	5.0,	150.0,	50.0 );	//Germany, Italy
 	globe.LinkNodes( 3,		5,	0.75,	150.0,	50.0 );	//Germany, Scandinavia
 	globe.LinkNodes( 3,		6,	0.5,	150.0,	50.0 );	//Germany, Poland
