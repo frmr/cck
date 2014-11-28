@@ -163,13 +163,14 @@ void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHei
 
 	for ( const auto& edge : edges )
 	{
-		double tempHeight = 0.0;
-		int tempId = -1;
-		edge->SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, tempHeight, tempId );
 
-		//if ( tempHeight > 0.0 )
+		const double influence = edge->GetInfluence( sampleCoord, samplePoint, globeRadius );
+
+		if ( influence > 0.0 )
 		{
-			tempHeight *= edge->GetInfluence( sampleCoord, samplePoint, globeRadius );
+			double tempHeight = 0.0;
+			int tempId = -1;
+			edge->SampleData( sampleCoord, samplePoint, globeRadius, noiseValue * influence, tempHeight, tempId );
 			if ( tempHeight >= highestHeight )
 			{
 				highestHeight = tempHeight;
@@ -180,13 +181,13 @@ void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHei
 
 	for ( const auto& node : nodes )
 	{
-		double tempHeight = 0.0;
-		int tempId = -1;
-		node->SampleData( sampleCoord, globeRadius, noiseValue, tempHeight, tempId );
+		const double influence = node->GetInfluence( sampleCoord, globeRadius );
 
-		//if ( tempHeight > 0.0 )
+		if ( influence > 0.0 )
 		{
-			tempHeight *= node->GetInfluence( sampleCoord, globeRadius );
+			double tempHeight = 0.0;
+			int tempId = -1;
+			node->SampleData( noiseValue * influence, tempHeight, tempId );
 			if ( tempHeight >= highestHeight )
 			{
 				highestHeight = tempHeight;

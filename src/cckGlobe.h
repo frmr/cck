@@ -169,7 +169,7 @@ namespace cck
 			double						GetMountainHeight( const cck::GeoCoord& sampleCoord, const double globeRadius, const double noiseValue, const double segmentHeight ) const;
 			shared_ptr<Segment>			GetSegment() const;
 			bool						LinkedTo( const int nodeId ) const;
-			void						SampleData( const cck::GeoCoord& sampleCoord, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const;
+			void						SampleData( const double noiseValue, double& sampleHeight, int& sampleId ) const;
 
 		public:
 			Node( const int id, const cck::GeoCoord& coord, const double minHeight, const double maxHeight, const double radius, const double globeRadius );	//Node for continent definitions

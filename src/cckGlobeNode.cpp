@@ -44,7 +44,8 @@ double cck::Globe::Node::GetInfluence( const cck::GeoCoord& sampleCoord, const d
 	if ( distance <= radius )
 	{
 		double fraction = distance / radius;
-		return 1.0 - ( fraction * fraction );
+		//return 1.0 - ( fraction * fraction );
+		return 1.0 - fraction;
 	}
 	return 0.0;
 }
@@ -98,9 +99,8 @@ bool cck::Globe::Node::LinkedTo( const int nodeId ) const
 	return false;
 }
 
-void cck::Globe::Node::SampleData( const cck::GeoCoord& sampleCoord, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const
+void cck::Globe::Node::SampleData( const double noiseValue, double& sampleHeight, int& sampleId ) const
 {
-	//sampleHeight = minHeight + ( noiseValue * GetInfluence( sampleCoord, globeRadius ) ) * ( maxHeight - minHeight );
 	sampleHeight = minHeight + noiseValue * ( maxHeight - minHeight );
 	sampleId = id;
 }

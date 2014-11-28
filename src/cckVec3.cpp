@@ -3,11 +3,6 @@
 #include "cckMath.h"
 #include <cmath>
 
-cck::Vec3 cck::Vec3::Reverse() const
-{
-	return cck::Vec3( -x, -y, -z );
-}
-
 cck::GeoCoord cck::Vec3::ToGeographic() const
 {
 	double lonRadians = atan2( y, x );

@@ -13,7 +13,6 @@ namespace cck
 		double	x, y, z;
 
 	public:
-		Vec3			Reverse() const;
 		cck::GeoCoord	ToGeographic() const;
 		Vec3			Unit() const;
 
