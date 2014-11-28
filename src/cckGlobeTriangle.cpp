@@ -89,11 +89,7 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Triangle::CreateNodeVector( con
 
 double cck::Globe::Triangle::GetInfluence( const cck::Vec3& samplePoint ) const
 {
-	if ( Contains( samplePoint ) )
-	{
-		return 1.0;
-	}
-	return 0.0;
+	return Contains( samplePoint ) ? 1.0 : 0.0;
 }
 
 bool cck::Globe::Triangle::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const

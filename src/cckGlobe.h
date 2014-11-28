@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 
+#include "cckBoundingBox.h"
 #include "cckError.h"
 #include "cckGeoCoord.h"
 #include "cckSimplexNoise.h"
@@ -158,6 +159,7 @@ namespace cck
 			const double				maxHeight;
 			const double				radius;
 			const double				plateau;
+			//const cck::BoundingBox		bounds;
 
 		public:
 			void 						AddLink( const shared_ptr<Link>& newLink );

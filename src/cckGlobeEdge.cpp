@@ -1,6 +1,8 @@
 #include "cckGlobe.h"
 #include "cckMath.h"
 
+#include <limits>
+
 cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& samplePoint ) const
 {
 	return cck::Vec3( samplePoint - normal * cck::DotProduct( normal, samplePoint ) );
@@ -47,14 +49,7 @@ bool cck::Globe::Edge::Contains( const cck::Vec3& point ) const
 	const double u = ( dot1p - dot12 * dot2p ) * invDenom;
 	const double v = ( dot2p - dot12 * dot1p ) * invDenom;
 
-	if ( u < 0.0 || v < 0.0 )
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+	return ( u < 0.0 || v < 0.0 ) ? false : true;
 }
 
 bool cck::Globe::Edge::PointOnFreeSide( const cck::Vec3& samplePoint ) const
@@ -103,7 +98,7 @@ double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& sampleCoord, const c
 
 double cck::Globe::Edge::GetMountainHeight( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, const double segmentHeight ) const
 {
-	const cck::Vec3 closest = ClosestPoint( samplePoint );
+	const cck::Vec3 closest = ClosestPoint( samplePoint ).Unit(); //TODO: Unit is probably not necessary here;
 
 	if ( Contains( closest ) )
 	{
@@ -122,8 +117,7 @@ double cck::Globe::Edge::GetMountainHeight( const cck::GeoCoord& sampleCoord, co
 			return ( distance <= edgePlateau ) ? edgeHeight : cck::Globe::CalculateMountainHeight( segmentHeight, edgeHeight, edgeRadius, edgePlateau, distance );
 		}
 	}
-
-	return 0.0;
+	return std::numeric_limits<double>::min();
 }
 
 bool cck::Globe::Edge::IsActive() const
@@ -133,7 +127,6 @@ bool cck::Globe::Edge::IsActive() const
 
 void cck::Globe::Edge::SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const
 {
-	//tree.SampleData( sampleCoord, samplePoint, globeRadius, noiseValue * GetInfluence( sampleCoord, samplePoint, globeRadius ), sampleHeight, sampleId );
 	tree.SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, sampleHeight, sampleId );
 }
 

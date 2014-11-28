@@ -6,14 +6,12 @@
 #include <limits>
 #include <string>
 
-#define PI 3.1415926535
-
 using namespace std;
 
 int main()
 {
-	int xRes = 512;
-	int yRes = 256;
+	int xRes = 2048;
+	int yRes = 1024;
 
 	int seed = time(NULL);
 	srand(seed);

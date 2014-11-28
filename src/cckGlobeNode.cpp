@@ -1,6 +1,8 @@
 #include "cckGlobe.h"
 #include "cckMath.h"
 
+#include <limits>
+
 void cck::Globe::Node::AddLink( const shared_ptr<Link>& newLink )
 {
 	links.push_back( newLink );
@@ -69,17 +71,9 @@ double cck::Globe::Node::GetMountainHeight( const cck::GeoCoord& sampleCoord, co
 	if ( distance <= radius )
 	{
 		const double height = minHeight + noiseValue * ( maxHeight - minHeight );
-		if ( distance <= plateau )
-		{
-			return height;
-		}
-		else
-		{
-
-			return cck::Globe::CalculateMountainHeight( segmentHeight, height, radius, plateau, distance );
-		}
+		return ( distance <= plateau ) ? height : cck::Globe::CalculateMountainHeight( segmentHeight, height, radius, plateau, distance );
 	}
-	return 0.0;
+	return std::numeric_limits<double>::min();
 }
 
 shared_ptr<cck::Globe::Segment> cck::Globe::Node::GetSegment() const
@@ -115,6 +109,7 @@ cck::Globe::Node::Node( const int id, const cck::GeoCoord& coord, const double m
 		maxHeight( maxHeight ),
 		radius( radius ),
 		plateau( 0.0 )
+		//bounds( coord - , coord + ) //x angle -> arc length (radius)
 {
 }
 
