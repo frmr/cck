@@ -121,6 +121,13 @@ int main()
 	globe.LinkNodes( 25,	26,	-0.5,	1.0,	150.0,	50.0 );	//Korea, Siberia 3
 	globe.LinkNodes( 26,	27,	-0.5,	1.0,	150.0,	50.0 );	//Siberia 3, Siberia 4
 
+	cck::Vec3 colors[50];
+	for ( int i = 0; i < 50; ++i )
+	{
+		colors[i] = cck::Vec3( rand() / ( RAND_MAX / 255 ),
+								rand() / ( RAND_MAX / 255 ),
+								rand() / ( RAND_MAX / 255 ) );
+	}
 
 	BMP heightMap;
 	heightMap.SetSize( xRes, yRes );
@@ -170,35 +177,11 @@ int main()
 					idMap(x,y)->Green = 255;
 					idMap(x,y)->Blue = 255;
 				}
-				else if ( id == 0 )
+				else
 				{
-					idMap(x,y)->Red = 255;
-					idMap(x,y)->Green = 0;
-					idMap(x,y)->Blue = 0;
-				}
-				else if ( id == 1 )
-				{
-					idMap(x,y)->Red = 0;
-					idMap(x,y)->Green = 255;
-					idMap(x,y)->Blue = 0;
-				}
-				else if ( id == 2 )
-				{
-					idMap(x,y)->Red = 0;
-					idMap(x,y)->Green = 0;
-					idMap(x,y)->Blue = 255;
-				}
-				else if ( id == 3 )
-				{
-					idMap(x,y)->Red = 255;
-					idMap(x,y)->Green = 255;
-					idMap(x,y)->Blue = 0;
-				}
-				else if ( id == 4 )
-				{
-					idMap(x,y)->Red = 128;
-					idMap(x,y)->Green = 128;
-					idMap(x,y)->Blue = 0;
+					idMap(x,y)->Red = colors[id].x;
+					idMap(x,y)->Green = colors[id].y;
+					idMap(x,y)->Blue = colors[id].z;
 				}
 			}
 			else
