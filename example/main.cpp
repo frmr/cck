@@ -10,8 +10,8 @@ using namespace std;
 
 int main()
 {
-	int xRes = 2048;
-	int yRes = 1024;
+	int xRes = 512;
+	int yRes = 256;
 
 	int seed = time(NULL);
 	srand(seed);

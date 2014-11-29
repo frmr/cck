@@ -1,11 +1,11 @@
-#ifndef CCK_BOUNDING_BOX_H
-#define CCK_BOUNDING_BOX_H
+#ifndef CCK_BOUND_BOX_H
+#define CCK_BOUND_BOX_H
 
 #include "cckGeoCoord.h"
 
 namespace cck
 {
-	class BoundingBox
+	class BoundBox
 	{
 	public:
 		const cck::GeoCoord minCoord;
@@ -16,8 +16,8 @@ namespace cck
 		bool Contains( const cck::GeoCoord& coord ) const;
 
 	public:
-		BoundingBox( const cck::GeoCoord& minCoord, const cck::GeoCoord& maxCoord );
+		BoundBox( const cck::GeoCoord& minCoord, const cck::GeoCoord& maxCoord );
 	};
 }
 
-#endif // CCK_BOUNDING_BOX_H
+#endif // CCK_BOUND_BOX_H

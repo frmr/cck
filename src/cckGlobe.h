@@ -5,7 +5,7 @@
 #include <vector>
 #include <queue>
 
-#include "cckBoundingBox.h"
+#include "cckBoundBox.h"
 #include "cckError.h"
 #include "cckGeoCoord.h"
 #include "cckSimplexNoise.h"
@@ -91,6 +91,7 @@ namespace cck
 
 		public:
 			void						AddSides();
+			double						GetDistance( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const;
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const;
 			double 						GetMountainHeight( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, const double segmentHeight ) const;
 			bool						IsActive() const;
@@ -159,13 +160,14 @@ namespace cck
 			const double				maxHeight;
 			const double				radius;
 			const double				plateau;
-			//const cck::BoundingBox		bounds;
+			//const cck::BoundBox		bounds;
 
 		public:
 			void 						AddLink( const shared_ptr<Link>& newLink );
 			void						AddToSegment( const shared_ptr<Edge>& newEdge );
 			void						AddToSegment( const shared_ptr<Node>& newNode );
 			vector<shared_ptr<Node>>	FindCommonNeighbors( const shared_ptr<Node>& refNode );
+			double						GetDistance( const cck::GeoCoord& sampleCoord, const double globeRadius ) const;
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const double globeRadius ) const;
 			shared_ptr<Link>			GetLinkTo( const int targetId ) const;
 			double						GetMountainHeight( const cck::GeoCoord& sampleCoord, const double globeRadius, const double noiseValue, const double segmentHeight ) const;
@@ -189,7 +191,7 @@ namespace cck
 			const vector<shared_ptr<Side>>	sides;
 			const shared_ptr<Node>			centerNode;
 			const BspTree					tree;
-			//TODO: Bounding box class
+			//const cck::BoundBox			bounds;
 
 		private:
 			BspTree						ConstructTree( const double globeRadius ) const;

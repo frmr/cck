@@ -1,6 +1,6 @@
-#include "cckBoundingBox.h"
+#include "cckBoundBox.h"
 
-bool cck::BoundingBox::Contains( const double latitude, const double longitude ) const
+bool cck::BoundBox::Contains( const double latitude, const double longitude ) const
 {
 	return	latitude >= minCoord.latRadians &&
 			latitude <= maxCoord.latRadians &&
@@ -8,7 +8,7 @@ bool cck::BoundingBox::Contains( const double latitude, const double longitude )
 			longitude <= maxCoord.lonRadians;
 }
 
-bool cck::BoundingBox::Contains( const cck::GeoCoord& coord ) const
+bool cck::BoundBox::Contains( const cck::GeoCoord& coord ) const
 {
 	return	coord.latRadians >= minCoord.latRadians &&
 			coord.latRadians <= maxCoord.latRadians &&
@@ -16,7 +16,7 @@ bool cck::BoundingBox::Contains( const cck::GeoCoord& coord ) const
 			coord.lonRadians <= maxCoord.lonRadians;
 }
 
-cck::BoundingBox::BoundingBox( const cck::GeoCoord& minCoord, const cck::GeoCoord& maxCoord )
+cck::BoundBox::BoundBox( const cck::GeoCoord& minCoord, const cck::GeoCoord& maxCoord )
 	:	minCoord( minCoord ),
 		maxCoord( maxCoord )
 {

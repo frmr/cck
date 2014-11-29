@@ -211,9 +211,6 @@ void cck::Globe::SampleInfluence( const cck::GeoCoord& sampleCoord, double& samp
 
 	for ( const auto& triangle : triangles )
 	{
-		//double tempHeight = 0.0;
-		//int tempId = -1;
-		//if ( triangle->SampleData( sampleCoord, samplePoint, globeRadius, 1.0f, tempHeight, tempId ) )
 		double influence = triangle->GetInfluence( samplePoint );
 		if ( influence > 0.0 )
 		{

@@ -74,9 +74,28 @@ void cck::Globe::Edge::AddSides()
 	sides.push_back( std::make_shared<Side>( nodeB, nodeA, shared_from_this() ) );
 }
 
+double cck::Globe::Edge::GetDistance( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const
+{
+	const cck::Vec3 closest = ClosestPoint( samplePoint ).Unit(); //TODO: Unit is probably not necessary here;
+
+	if ( Contains( closest ) )
+	{
+		const cck::GeoCoord closestCoord = closest.ToGeographic();
+		const double closestDistToNodeA = cck::Distance( nodeA->coord, closestCoord, globeRadius );
+		const double edgeRadius = nodeA->radius + ( ( nodeB->radius - nodeA->radius ) * ( closestDistToNodeA / length ) );
+		const double distance = cck::Distance( sampleCoord, closestCoord, globeRadius );
+
+		if ( distance <= edgeRadius )
+		{
+			return distance;
+		}
+	}
+	return std::numeric_limits<double>::max();
+}
+
 double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const
 {
-	if ( PointOnFreeSide( samplePoint ) )
+	if ( PointOnFreeSide( samplePoint ) )//TODO: This might not be necessary
 	{
 		const cck::Vec3 closest = ClosestPoint( samplePoint );
 
@@ -142,7 +161,8 @@ cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& n
 		nodeA( nodeA ),
 		nodeB( nodeB ),
 		length( cck::Distance( nodeA->coord, nodeB->coord, globeRadius ) ),
-		centerNode( std::make_shared<Node>( ( nodeA->coord.ToCartesian( globeRadius ) + nodeB->coord.ToCartesian( globeRadius ) ) * 0.5f , mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau ) ),
+		centerNode( std::make_shared<Node>( nodeA->coord.ToCartesian( globeRadius ) + ( ( nodeB->coord.ToCartesian( globeRadius ) - nodeA->coord.ToCartesian( globeRadius ) ) * nodeA->radius / ( nodeA->radius + nodeB->radius ) ),
+											mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau ) ),
 		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ).Unit() ),
 		tree( ConstructTree( mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau, globeRadius ) )
 {

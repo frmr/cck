@@ -40,6 +40,12 @@ vector<shared_ptr<cck::Globe::Node>> cck::Globe::Node::FindCommonNeighbors( cons
 	return commonNeighbors;
 }
 
+double cck::Globe::Node::GetDistance( const cck::GeoCoord& sampleCoord, const double globeRadius ) const
+{
+	const double distance = cck::Distance( coord, sampleCoord, globeRadius );
+	return ( distance <= radius ) ? distance : std::numeric_limits<double>::max();
+}
+
 double cck::Globe::Node::GetInfluence( const cck::GeoCoord& sampleCoord, const double globeRadius ) const
 {
 	const double distance = cck::Distance( coord, sampleCoord, globeRadius );
