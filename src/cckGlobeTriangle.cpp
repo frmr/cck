@@ -54,7 +54,12 @@ bool cck::Globe::Triangle::Contains( const cck::Vec3& point ) const
 
 shared_ptr<cck::Globe::Node> cck::Globe::Triangle::CreateCenterNode() const
 {
-	//average node properties
+	for ( int i = 0; i < sides.size(); ++i )
+	{
+		//find weighted average point with side+1
+	}
+
+	//average average-node properties
 	cck::Vec3 averagePosition;
 	double averageMinHeight = 0.0;
 	double averageMaxHeight = 0.0;

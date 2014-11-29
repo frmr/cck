@@ -161,8 +161,9 @@ cck::Globe::Edge::Edge( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& n
 		nodeA( nodeA ),
 		nodeB( nodeB ),
 		length( cck::Distance( nodeA->coord, nodeB->coord, globeRadius ) ),
-		centerNode( std::make_shared<Node>( nodeA->coord.ToCartesian( globeRadius ) + ( ( nodeB->coord.ToCartesian( globeRadius ) - nodeA->coord.ToCartesian( globeRadius ) ) * nodeA->radius / ( nodeA->radius + nodeB->radius ) ),
-											mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau ) ),
+		//centerNode( std::make_shared<Node>( nodeA->coord.ToCartesian( globeRadius ) + ( ( nodeB->coord.ToCartesian( globeRadius ) - nodeA->coord.ToCartesian( globeRadius ) ) * nodeA->radius / ( nodeA->radius + nodeB->radius ) ),
+											//mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau ) ),
+		centerNode( std::make_shared<Node>( ( nodeA->coord.ToCartesian( globeRadius ) * nodeB->radius + nodeB->coord.ToCartesian( globeRadius ) * nodeA->radius ) / 2.0, mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau ) ),
 		normal( cck::CrossProduct( nodeA->unitVec, nodeB->unitVec ).Unit() ),
 		tree( ConstructTree( mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau, globeRadius ) )
 {
