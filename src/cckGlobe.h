@@ -235,7 +235,6 @@ namespace cck
 
 	private:
 		double							globeRadius;
-		double							seaLevel;
 		vector<shared_ptr<Node>>		nodes;
 		vector<shared_ptr<Edge>>		edges;
 		vector<shared_ptr<Triangle>>	triangles;
@@ -264,7 +263,7 @@ namespace cck
 		cck::NoiseError	SetNoiseParameters( const int octaves, const double persistance, const double frequency );
 
 	public:
-		Globe( const double radius, const double seaLevel, const unsigned int seed );
+		Globe( const double radius, const unsigned int seed );
 	};
 }
 #endif // CCK_GLOBE_H

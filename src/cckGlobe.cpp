@@ -259,10 +259,8 @@ cck::NoiseError	cck::Globe::SetNoiseParameters( const int octaves, const double 
 	return cck::NoiseError::SUCCESS;
 }
 
-cck::Globe::Globe( const double globeRadius, const double seaLevel, const unsigned int seed )
+cck::Globe::Globe( const double globeRadius, const unsigned int seed )
 	:	globeRadius( globeRadius ),
-		//seaScale( ( seaScale < 0.0 || seaScale > 1.0 ) ? 0.4 : seaScale ),
-		seaLevel( seaLevel ),
 		noise( seed ),
 		noiseOctaves( 7 ),
 		noisePersistance( 0.6 ),
