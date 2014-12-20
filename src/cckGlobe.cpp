@@ -98,7 +98,8 @@ cck::LinkError cck::Globe::LinkNodes( const int nodeIdA, const int nodeIdB, cons
 		//dot product with each edge side
 		for ( const auto& edge : commonEdges )
 		{
-			for ( const auto& side : edge->sides )
+			vector<shared_ptr<Side>> edgeSides = edge->GetSides();
+			for ( const auto& side : edgeSides )
 			{
 				if ( DotProduct( side->normal, average ) >= 0.0 )
 				{

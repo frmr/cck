@@ -71,6 +71,7 @@ namespace cck
 		{
 		private:
 			bool						active;
+			vector<shared_ptr<Side>>	sides;			//this should probably be private
 
 		public:
 			shared_ptr<Edge>			positiveMountain;
@@ -81,7 +82,7 @@ namespace cck
 			const shared_ptr<Node>		centerNode;		//nullptr if a mountain Edge
 			const cck::Vec3				normal;
 			const BspTree				tree;
-			vector<shared_ptr<Side>>	sides;			//this should probably be private
+
 
 		private:
 			cck::Vec3					ClosestPoint( const cck::Vec3& samplePoint ) const;
@@ -94,6 +95,7 @@ namespace cck
 			double						GetDistance( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const;
 			double						GetInfluence( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const;
 			double 						GetMountainHeight( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, const double segmentHeight ) const;
+			vector<shared_ptr<Side>>	GetSides() const;
 			bool						IsActive() const;
 			void						SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const;
 			void						SetInactive();
@@ -111,16 +113,15 @@ namespace cck
 		class Side
 		{
 		private:
-			bool formsTriangle;
+			bool	formsTriangle;
 
 		public:
-			const cck::Vec3			normal;
-			const shared_ptr<Edge>	edge;
-			//TODO: Add Triangle variable, can only have one
+			const	cck::Vec3			normal;
+			const	shared_ptr<Edge>	edge;
 
 		public:
-			bool FormsTriangle() const;
-			void SetFormsTriangle();
+			bool	FormsTriangle() const;
+			void	SetFormsTriangle();
 
 		public:
 			Side( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Edge>& edge );
@@ -132,11 +133,11 @@ namespace cck
 		class Link
 		{
 		public:
-			const shared_ptr<Node>	target;
-			const shared_ptr<Edge>	edge;
+			const	shared_ptr<Node>	target;
+			const	shared_ptr<Edge>	edge;
 
 		public:
-			bool LinksTo( const int nodeId ) const;
+			bool	LinksTo( const int nodeId ) const;
 
 		public:
 			Link( const shared_ptr<Node>& target, const shared_ptr<Edge>& edge );
@@ -195,7 +196,7 @@ namespace cck
 
 		private:
 			BspTree						ConstructTree( const double globeRadius ) const;
-			bool 						Contains( const cck::Vec3& point ) const;
+			bool						Contains( const cck::Vec3& point ) const;
 			shared_ptr<Node>			CreateCenterNode() const;
 			vector<shared_ptr<Node>>	CreateNodeVector( const shared_ptr<Node>& nodeA, const shared_ptr<Node>& nodeB, const shared_ptr<Node>& nodeC ) const;
 
@@ -221,9 +222,9 @@ namespace cck
 			const shared_ptr<Node>		baseNode;
 
 		public:
-			void AddEdge( const shared_ptr<Edge>& newEdge );
-			void AddNode( const shared_ptr<Node>& newNode );
-			void SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const;
+			void						AddEdge( const shared_ptr<Edge>& newEdge );
+			void						AddNode( const shared_ptr<Node>& newNode );
+			void						SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const;
 
 		public:
 			Segment( const shared_ptr<Node>& baseNode, const vector<shared_ptr<Node>>& mountainNodes, const vector<shared_ptr<Edge>>& mountainEdges );
@@ -245,22 +246,22 @@ namespace cck
 		double							influenceFactor;
 
 	private:
-		static double	CalculateMountainHeight( const double segmentHeight, const double mountainHeight, const double radius, const double plateau, const double distance );
+		static double					CalculateMountainHeight( const double segmentHeight, const double mountainHeight, const double radius, const double plateau, const double distance );
 
 	public:
-		cck::NodeError	AddNode( const int id, const double latitude, const double longitude, const double minHeight, const double maxHeight, const double nodeRadius );
-		cck::NodeError	AddNode( const int id, const cck::GeoCoord& coord, const double minHeight, const double maxHeight, const double nodeRadius );
+		cck::NodeError					AddNode( const int id, const double latitude, const double longitude, const double minHeight, const double maxHeight, const double nodeRadius );
+		cck::NodeError					AddNode( const int id, const cck::GeoCoord& coord, const double minHeight, const double maxHeight, const double nodeRadius );
 
-		cck::LinkError	LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainMinHeight, const double mountainMaxHeight, const double mountainRadius, const double mountainPlateau );
+		cck::LinkError					LinkNodes( const int nodeIdA, const int nodeIdB, const double mountainMinHeight, const double mountainMaxHeight, const double mountainRadius, const double mountainPlateau );
 
-		void			SampleData( const double sampleLatitude, const double sampleLongitude, double& sampleHeight, int& sampleId ) const;
-		void			SampleData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const;
+		void							SampleData( const double sampleLatitude, const double sampleLongitude, double& sampleHeight, int& sampleId ) const;
+		void							SampleData( const cck::GeoCoord& sampleCoord, double& sampleHeight, int& sampleId ) const;
 
-		void			SampleInfluence( const double sampleLatitude, const double sampleLongitude, double& sampleInfluence ) const;
-		void			SampleInfluence( const cck::GeoCoord& sampleCoord, double& sampleInfluence ) const;
+		void							SampleInfluence( const double sampleLatitude, const double sampleLongitude, double& sampleInfluence ) const;
+		void							SampleInfluence( const cck::GeoCoord& sampleCoord, double& sampleInfluence ) const;
 
-		void			SetInfluenceFactor( const double newInfluenceFactor );
-		cck::NoiseError	SetNoiseParameters( const int octaves, const double persistance, const double frequency );
+		void							SetInfluenceFactor( const double newInfluenceFactor );
+		cck::NoiseError					SetNoiseParameters( const int octaves, const double persistance, const double frequency );
 
 	public:
 		Globe( const double radius, const unsigned int seed );

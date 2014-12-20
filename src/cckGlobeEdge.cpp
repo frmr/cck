@@ -139,6 +139,11 @@ double cck::Globe::Edge::GetMountainHeight( const cck::GeoCoord& sampleCoord, co
 	return std::numeric_limits<double>::min();
 }
 
+vector<shared_ptr<cck::Globe::Side>> cck::Globe::Edge::GetSides() const
+{
+	return sides;
+}
+
 bool cck::Globe::Edge::IsActive() const
 {
 	return active;
