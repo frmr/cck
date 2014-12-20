@@ -54,7 +54,7 @@ bool cck::Globe::Triangle::Contains( const cck::Vec3& point ) const
 
 shared_ptr<cck::Globe::Node> cck::Globe::Triangle::CreateCenterNode() const
 {
-	for ( int i = 0; i < sides.size(); ++i )
+	for ( unsigned int i = 0; i < sides.size(); ++i )
 	{
 		//find weighted average point with side+1
 	}

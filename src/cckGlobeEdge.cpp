@@ -106,7 +106,7 @@ double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& sampleCoord, const c
 			const double distance = cck::Distance( sampleCoord, closestCoord, globeRadius );
 			if ( distance <= maxDist )
 			{
-				double fraction = distance / maxDist;
+				const double fraction = distance / maxDist;
 				//return 1.0 - ( fraction * fraction );
 				return 1.0 - fraction;
 			}

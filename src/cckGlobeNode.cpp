@@ -51,7 +51,7 @@ double cck::Globe::Node::GetInfluence( const cck::GeoCoord& sampleCoord, const d
 	const double distance = cck::Distance( coord, sampleCoord, globeRadius );
 	if ( distance <= radius )
 	{
-		double fraction = distance / radius;
+		const double fraction = distance / radius;
 		//return 1.0 - ( fraction * fraction );
 		return 1.0 - fraction;
 	}

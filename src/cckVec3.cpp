@@ -21,7 +21,7 @@ cck::GeoCoord cck::Vec3::ToGeographic() const
 
 cck::Vec3 cck::Vec3::Unit() const
 {
-	double length = sqrt( x * x + y * y + z * z );
+	const double length = sqrt( x * x + y * y + z * z );
 	return cck::Vec3( x / length, y / length, z / length );
 }
 
