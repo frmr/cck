@@ -71,11 +71,11 @@ int main()
 
 
 
-	globe.LinkNodes( 1,		2,	-0.3,	4.0,	150.0,	50.0 );	//France, Iberia
+	globe.LinkNodes( 1,		2,	-0.2,	4.0,	150.0,	50.0 );	//France, Iberia
 	globe.LinkNodes( 1,		3,	-0.3,	0.75,	150.0,	50.0 );	//France, Germany
 	globe.LinkNodes( 1,		4,	-0.3,	5.0,	150.0,	50.0 ); //France, Italy
 	globe.LinkNodes( 4,		2,	-0.3,	0.75,	150.0,	50.0 ); //Italy, Iberia
-	globe.LinkNodes( 4,		7,	-0.75,	0.75,	150.0,	50.0 ); //Italy, Balkans
+	globe.LinkNodes( 4,		7,	-0.5,	0.75,	150.0,	50.0 ); //Italy, Balkans
 	globe.LinkNodes( 3,		4,	-0.3,	5.0,	150.0,	50.0 );	//Germany, Italy
 	globe.LinkNodes( 3,		5,	-0.75,	0.75,	150.0,	50.0 );	//Germany, Scandinavia
 	globe.LinkNodes( 3,		6,	-0.4,	0.5,	150.0,	50.0 );	//Germany, Poland
@@ -100,8 +100,6 @@ int main()
 	globe.LinkNodes( 16,	15,	-0.5,	1.0,	150.0,	50.0 );	//North India, Himalayas
 	globe.LinkNodes( 12,	16,	-0.5,	1.0,	150.0,	50.0 );	//Central Asia, North India
 	globe.LinkNodes( 12,	15,	-0.2,	0.75,	150.0,	50.0 );	//Central Asia, Himalayas
-	//globe.LinkNodes( 13,	15,	-0.25,	0.5,	150.0,	50.0 );	//Siberia 1, Himalayas
-	//globe.LinkNodes( 14,	15,	-0.5,	0.75,	150.0,	50.0 );	//Siberia 2, Himalayas
 	globe.LinkNodes( 16,	18,	-0.5,	1.0,	150.0,	50.0 );	//North India, Burma
 	globe.LinkNodes( 18,	19,	-1.0,	1.5,	150.0,	50.0 );	//Burma, Indochina
 	globe.LinkNodes( 19,	20,	-0.5,	0.75,	150.0,	50.0 );	//Indochina, Malaysia
@@ -114,7 +112,6 @@ int main()
 	globe.LinkNodes( 21,	23,	-0.5,	2.0,	150.0,	50.0 );	//Inner China, North China
 	globe.LinkNodes( 23,	24,	-0.3,	0.5,	150.0,	50.0 );	//North China, Mongolia
 	globe.LinkNodes( 21,	24,	-0.5,	1.5,	150.0,	50.0 );	//Inner China, Mongolia
-	//globe.LinkNodes( 15,	24,	-0.5,	1.5,	150.0,	50.0 );	//Himalayas, Mongolia
 	globe.LinkNodes( 14,	24,	-0.5,	1.5,	150.0,	50.0 );	//Siberia 2, Mongolia
 	globe.LinkNodes( 14,	26,	-0.5,	1.0,	150.0,	50.0 );	//Siberia 2, Siberia 3
 	globe.LinkNodes( 24,	26,	-0.5,	1.0,	150.0,	50.0 );	//Mongolia, Siberia 3
@@ -122,12 +119,12 @@ int main()
 	globe.LinkNodes( 25,	26,	-0.5,	1.0,	150.0,	50.0 );	//Korea, Siberia 3
 	globe.LinkNodes( 26,	27,	-0.5,	1.0,	150.0,	50.0 );	//Siberia 3, Siberia 4
 
-	globe.LinkNodes( 12,	29,	-1.0,	2.5,	150.0,	50.0 );	//Central Asia, Xinjiang
-	globe.LinkNodes( 13,	29,	-1.0,	2.5,	150.0,	50.0 );	//Siberia 1, Xinjiang
-	globe.LinkNodes( 14,	29,	-1.0,	2.5,	150.0,	50.0 );	//Siberia 2, Xinjiang
-	globe.LinkNodes( 24,	29,	-1.0,	2.5,	150.0,	50.0 );	//Mongolia, Xinjiang
-	globe.LinkNodes( 15,	29,	-1.0,	2.5,	150.0,	50.0 );	//Himalayas, Xinjiang
-	globe.LinkNodes( 21,	29,	-1.0,	2.5,	150.0,	50.0 );	//Inner, Xinjiang
+	globe.LinkNodes( 12,	29,	-0.2,	0.75,	150.0,	50.0 );	//Central Asia, Xinjiang
+	globe.LinkNodes( 13,	29,	-0.2,	0.5,	150.0,	50.0 );	//Siberia 1, Xinjiang
+	globe.LinkNodes( 14,	29,	-0.3,	0.75,	150.0,	50.0 );	//Siberia 2, Xinjiang
+	globe.LinkNodes( 24,	29,	-0.5,	1.5,	150.0,	50.0 );	//Mongolia, Xinjiang
+	globe.LinkNodes( 15,	29,	0.0,	2.5,	150.0,	50.0 );	//Himalayas, Xinjiang
+	globe.LinkNodes( 21,	29,	-0.5,	2.0,	150.0,	50.0 );	//Inner, Xinjiang
 
 	cck::Vec3 colors[50];
 	for ( int i = 0; i < 50; ++i )
