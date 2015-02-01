@@ -38,7 +38,7 @@ namespace cck
 			private:
 				shared_ptr<Edge>	edge;
 				shared_ptr<Node>	node;
-				shared_ptr<BspNode>	posChild; //TODO: change these two to unique_ptr in C++14
+				shared_ptr<BspNode>	posChild;
 				shared_ptr<BspNode>	negChild;
 
 			public:

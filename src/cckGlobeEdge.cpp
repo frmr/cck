@@ -11,8 +11,8 @@ cck::Vec3 cck::Globe::Edge::ClosestPoint( const cck::Vec3& samplePoint ) const
 cck::Globe::BspTree cck::Globe::Edge::ConstructTree( const double mountainMinHeight, const double mountainMaxHeight, const double mountainRadius, const double mountainPlateau, const double globeRadius )
 {
 	//construct nodes either side of center node
-	const auto positiveNode = std::make_shared<Node>( centerNode->position + normal * globeRadius, mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau );
-	const auto negativeNode = std::make_shared<Node>( centerNode->position - normal * globeRadius, mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau );
+	const shared_ptr<Node> positiveNode( new Node( centerNode->position + normal * globeRadius, mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau ) );
+	const shared_ptr<Node> negativeNode( new Node( centerNode->position - normal * globeRadius, mountainMinHeight, mountainMaxHeight, mountainRadius, mountainPlateau ) );
 
 	positiveMountain = std::make_shared<Edge>( centerNode, positiveNode, globeRadius );
 	negativeMountain = std::make_shared<Edge>( centerNode, negativeNode, globeRadius );

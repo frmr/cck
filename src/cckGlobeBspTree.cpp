@@ -10,8 +10,8 @@ bool cck::Globe::BspTree::BspNode::AddChildren( std::queue<bool>& coord, const s
 			if ( edge == nullptr )
 			{
 				edge = newEdge;
-				posChild = std::make_shared<BspNode>();
-				negChild = std::make_shared<BspNode>();
+				posChild = std::unique_ptr<BspNode>( new BspNode() );
+				negChild = std::unique_ptr<BspNode>( new BspNode() );
 				return true;
 			}
 		}
