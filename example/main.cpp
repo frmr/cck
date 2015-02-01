@@ -20,7 +20,6 @@ int main()
 	cout << globeSeed << endl;
 	cck::Globe globe( 6370.0, globeSeed );
 	globe.SetNoiseParameters( 8, 0.75, 0.00015 );
-	globe.SetInfluenceFactor( 10.0 );
 
 //	globe.AddNode( 0,	0.0,	-20.0,	1.0,	2500.0 );
 //	globe.AddNode( 1,	70.0,	180.0,	1.0,	2500.0 );

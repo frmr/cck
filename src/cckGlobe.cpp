@@ -144,13 +144,6 @@ void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHei
 	const cck::Vec3 samplePoint = sampleCoord.ToCartesian( globeRadius );
 	const double noiseValue = noise.ScaledOctaveNoise( samplePoint.x, samplePoint.y, samplePoint.z, noiseOctaves, noisePersistance, noiseFrequency, 0.0, 1.0 );
 
-//	if ( noiseValue * influenceFactor < seaScale )
-//	{
-//		sampleHeight = 0.0;
-//		sampleId = -1;
-//		return;
-//	}
-
 	for ( const auto& triangle : triangles )
 	{
 		if ( triangle->SampleData( sampleCoord, samplePoint, globeRadius, noiseValue, sampleHeight, sampleId ) )
@@ -243,11 +236,6 @@ void cck::Globe::SampleInfluence( const cck::GeoCoord& sampleCoord, double& samp
 	sampleInfluence = greatestInfluence;
 }
 
-void cck::Globe::SetInfluenceFactor( const double newInfluenceFactor )
-{
-	influenceFactor = newInfluenceFactor;
-}
-
 cck::NoiseError	cck::Globe::SetNoiseParameters( const int octaves, const double persistance, const double frequency )
 {
 	if ( octaves <= 0 )			return cck::NoiseError::NON_POSITIVE_OCTAVES;
@@ -265,7 +253,6 @@ cck::Globe::Globe( const double globeRadius, const unsigned int seed )
 		noise( seed ),
 		noiseOctaves( 7 ),
 		noisePersistance( 0.6 ),
-		noiseFrequency( 0.0001 ),
-		influenceFactor( 1.0 )
+		noiseFrequency( 0.0001 )
 {
 }
