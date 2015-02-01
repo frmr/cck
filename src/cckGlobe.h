@@ -56,7 +56,7 @@ namespace cck
 
 		public:
 			bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge );
-			bool				AddNode( std::queue<bool>& coord, const shared_ptr<Node>& newNode ); //TODO: AddNode could be confused with AddChildren; fix
+			bool				AddNode( std::queue<bool>& coord, const shared_ptr<Node>& newNode );
 			bool				IsComplete() const;
 			void				SampleData( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, double& sampleHeight, int& sampleId ) const;
 

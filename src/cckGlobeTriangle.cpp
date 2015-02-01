@@ -7,7 +7,7 @@ cck::Globe::BspTree cck::Globe::Triangle::ConstructTree( const double globeRadiu
 	//create Edges between triangles's center node and each side's center node
 	for ( const auto& side : sides )
 	{
-		const auto newMountainEdge = std::make_shared<Edge>( centerNode, side->edge->centerNode, globeRadius );
+		const std::shared_ptr<Edge> newMountainEdge( new Edge( centerNode, side->edge->centerNode, globeRadius ) );
 		mountainEdges.push_back( newMountainEdge );
 		side->edge->nodeA->AddToSegment( newMountainEdge ); //TODO: Only add the new edge to one segment; check with dot product against tangent
 		side->edge->nodeB->AddToSegment( newMountainEdge );
@@ -15,14 +15,14 @@ cck::Globe::BspTree cck::Globe::Triangle::ConstructTree( const double globeRadiu
 
     BspTree tempTree;
     std::queue<bool> coord;
-    tempTree.AddChildren( coord, mountainEdges[0] ); //TODO: Use iterators
+    tempTree.AddChildren( coord, mountainEdges.at(0) );
 
-    bool dotNode1 = cck::DotProduct( mountainEdges[0]->normal, sides[1]->edge->centerNode->unitVec ) >= 0.0;
+    bool dotNode1 = cck::DotProduct( mountainEdges.at(0)->normal, sides.at(1)->edge->centerNode->unitVec ) >= 0.0;
 	coord.push( dotNode1 );
-    tempTree.AddChildren( coord, mountainEdges[1] );
+    tempTree.AddChildren( coord, mountainEdges.at(1) );
 
     coord.push( !dotNode1 );
-    tempTree.AddChildren( coord, mountainEdges[2] );
+    tempTree.AddChildren( coord, mountainEdges.at(2) );
 
 	for ( int sideIndex = 1; sideIndex < 3; sideIndex++ )
 	{

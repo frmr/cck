@@ -21,22 +21,6 @@ int main()
 	cck::Globe globe( 6370.0, globeSeed );
 	globe.SetNoiseParameters( 8, 0.75, 0.00015 );
 
-//	globe.AddNode( 0,	0.0,	-20.0,	1.0,	2500.0 );
-//	globe.AddNode( 1,	70.0,	180.0,	1.0,	2500.0 );
-//	globe.AddNode( 2,	60.0,	45.0,	5.0,	2500.0 );
-//	globe.AddNode( 3,	-45.0,	90.0,	1.0,	2500.0 );
-//	globe.AddNode( 4,	-20.0,	-40.0,	1.0,	2500.0 );
-//
-//	globe.LinkNodes( 0,	1,	10.0,	400.0,	100.0 );
-//	globe.LinkNodes( 1,	2,	5.0,	400.0,	100.0 );
-//	globe.LinkNodes( 2,	0,	5.0,	400.0,	100.0 );
-//	globe.LinkNodes( 0,	3,	10.0,	400.0,	100.0 );
-//	globe.LinkNodes( 2,	3,	5.0,	400.0,	100.0 );
-//	globe.LinkNodes( 4, 0,	10.0,	400.0,	100.0 );
-//	globe.LinkNodes( 4, 3,	10.0,	400.0,	100.0 );
-
-
-
 	globe.AddNode( 0,	52.0,	-4.0,	-0.2,	0.5,	600.0 );	//Britain
 	globe.AddNode( 1,	46.0,	2.0,	-0.2,	0.5,	600.0 );	//France
 	globe.AddNode( 2,	40.0,	-4.0,	-0.2,	1.0,	750.0 );	//Iberia
@@ -128,7 +112,7 @@ int main()
 	cck::Vec3 colors[50];
 	for ( int i = 0; i < 50; ++i )
 	{
-		colors[i] = cck::Vec3( rand() / ( RAND_MAX / 255 ),
+		colors[i] = cck::Vec3(	rand() / ( RAND_MAX / 255 ),
 								rand() / ( RAND_MAX / 255 ),
 								rand() / ( RAND_MAX / 255 ) );
 	}

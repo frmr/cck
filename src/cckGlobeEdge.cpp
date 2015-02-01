@@ -76,7 +76,7 @@ void cck::Globe::Edge::AddSides()
 
 double cck::Globe::Edge::GetDistance( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const
 {
-	const cck::Vec3 closest = ClosestPoint( samplePoint ).Unit(); //TODO: Unit is probably not necessary here;
+	const cck::Vec3 closest = ClosestPoint( samplePoint );
 
 	if ( Contains( closest ) )
 	{
@@ -95,7 +95,7 @@ double cck::Globe::Edge::GetDistance( const cck::GeoCoord& sampleCoord, const cc
 
 double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius ) const
 {
-	if ( PointOnFreeSide( samplePoint ) )//TODO: This might not be necessary
+	if ( PointOnFreeSide( samplePoint ) )
 	{
 		const cck::Vec3 closest = ClosestPoint( samplePoint );
 
@@ -117,7 +117,7 @@ double cck::Globe::Edge::GetInfluence( const cck::GeoCoord& sampleCoord, const c
 
 double cck::Globe::Edge::GetMountainHeight( const cck::GeoCoord& sampleCoord, const cck::Vec3& samplePoint, const double globeRadius, const double noiseValue, const double segmentHeight ) const
 {
-	const cck::Vec3 closest = ClosestPoint( samplePoint ).Unit(); //TODO: Unit is probably not necessary here;
+	const cck::Vec3 closest = ClosestPoint( samplePoint );
 
 	if ( Contains( closest ) )
 	{
