@@ -5,7 +5,6 @@
 #include <cmath>
 #include <limits>
 #include <map>
-#include <iostream> //TODO: Remove this
 
 double cck::Globe::CalculateMountainHeight( const double segmentHeight, const double mountainHeight, const double radius, const double plateau, const double distance )
 {

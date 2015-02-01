@@ -38,8 +38,8 @@ namespace cck
 			private:
 				shared_ptr<Edge>	edge;
 				shared_ptr<Node>	node;
-				shared_ptr<BspNode>	posChild;
-				shared_ptr<BspNode>	negChild;
+				unique_ptr<BspNode>	posChild;
+				unique_ptr<BspNode>	negChild;
 
 			public:
 				bool				AddChildren( std::queue<bool>& coord, const shared_ptr<Edge>& newEdge );
