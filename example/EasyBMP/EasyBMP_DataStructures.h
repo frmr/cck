@@ -63,10 +63,10 @@ inline ebmpDWORD FlipDWORD( ebmpDWORD in )
 // in memory
 
 typedef struct RGBApixel {
-	ebmpBYTE Blue;
-	ebmpBYTE Green;
-	ebmpBYTE Red;
-	ebmpBYTE Alpha;
+    ebmpBYTE Blue;
+    ebmpBYTE Green;
+    ebmpBYTE Red;
+    ebmpBYTE Alpha;
 } RGBApixel; 
 
 class BMFH{

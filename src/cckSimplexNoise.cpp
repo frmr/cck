@@ -5,7 +5,7 @@
 
 double cck::SimplexNoise::Dot( const double* g, const double x, const double y, const double z ) const
 {
-	return g[0] * x + g[1] * y + g[2] * z;
+    return g[0] * x + g[1] * y + g[2] * z;
 }
 
 double cck::SimplexNoise::Noise( const double x, const double y, const double z ) const
@@ -34,40 +34,40 @@ double cck::SimplexNoise::Noise( const double x, const double y, const double z 
     int i2, j2, k2; // Offsets for third corner of simplex in (i,j,k) coords
 
     if ( x0 >= y0 )
-	{
+    {
         if ( y0 >= z0 )
         {
-        	i1=1; j1=0; k1=0;
-			i2=1; j2=1; k2=0;
-		}
+            i1=1; j1=0; k1=0;
+            i2=1; j2=1; k2=0;
+        }
         else if ( x0 >= z0 )
-		{
-			i1=1; j1=0; k1=0;
-			i2=1; j2=0; k2=1;
-		}
+        {
+            i1=1; j1=0; k1=0;
+            i2=1; j2=0; k2=1;
+        }
         else
-		{
-			i1=0; j1=0; k1=1;
-			i2=1; j2=0; k2=1;
-		}
+        {
+            i1=0; j1=0; k1=1;
+            i2=1; j2=0; k2=1;
+        }
     }
     else
-	{
+    {
         if ( y0 < z0 )
-		{
-			i1=0; j1=0; k1=1;
-			i2=0; j2=1; k2=1;
-		}
+        {
+            i1=0; j1=0; k1=1;
+            i2=0; j2=1; k2=1;
+        }
         else if ( x0 < z0 )
-		{
-			i1=0; j1=1; k1=0;
-			i2=0; j2=1; k2=1;
-		}
+        {
+            i1=0; j1=1; k1=0;
+            i2=0; j2=1; k2=1;
+        }
         else
-		{
-			i1=0; j1=1; k1=0;
-			i2=1; j2=1; k2=0;
-		}
+        {
+            i1=0; j1=1; k1=0;
+            i2=1; j2=1; k2=0;
+        }
     }
 
     // A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z),
@@ -96,44 +96,44 @@ double cck::SimplexNoise::Noise( const double x, const double y, const double z 
     // Calculate the contribution from the four corners
     double t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
     if( t0 < 0.0 )
-	{
-		n0 = 0.0;
-	}
+    {
+        n0 = 0.0;
+    }
     else
-	{
+    {
         t0 *= t0;
         n0 = t0 * t0 * Dot( grad3[gi0], x0, y0, z0 );
     }
 
     double t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
     if ( t1 < 0.0 )
-	{
-		n1 = 0.0;
-	}
+    {
+        n1 = 0.0;
+    }
     else
-	{
+    {
         t1 *= t1;
         n1 = t1 * t1 * Dot( grad3[gi1], x1, y1, z1 );
     }
 
     double t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
     if ( t2 < 0.0 )
-	{
-		n2 = 0.0;
-	}
+    {
+        n2 = 0.0;
+    }
     else
-	{
+    {
         t2 *= t2;
         n2 = t2 * t2 * Dot( grad3[gi2], x2, y2, z2 );
     }
 
     double t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
     if( t3 < 0.0 )
-	{
-		n3 = 0.0;
-	}
+    {
+        n3 = 0.0;
+    }
     else
-	{
+    {
         t3 *= t3;
         n3 = t3 * t3 * Dot( grad3[gi3], x3, y3, z3 );
     }
@@ -150,7 +150,7 @@ double cck::SimplexNoise::OctaveNoise( const double x, const double y, const dou
     double maxAmplitude = 0.0;
 
     for( int i = 0; i < octaves; i++ )
-	{
+    {
         total += Noise( x * frequency, y * frequency, z * frequency ) * amplitude;
 
         frequency *= 2.0;
@@ -163,19 +163,19 @@ double cck::SimplexNoise::OctaveNoise( const double x, const double y, const dou
 
 double cck::SimplexNoise::ScaledOctaveNoise( const double x, const double y, const double z, const int octaves, const double persistence, const double frequency, const double boundMin, const double boundMax ) const
 {
-	return OctaveNoise( x, y, z, octaves, persistence, frequency ) * ( boundMax - boundMin ) / 2.0 + ( boundMax + boundMin ) / 2.0;
+    return OctaveNoise( x, y, z, octaves, persistence, frequency ) * ( boundMax - boundMin ) / 2.0 + ( boundMax + boundMin ) / 2.0;
 }
 
 cck::SimplexNoise::SimplexNoise( const unsigned int seed )
-	:	grad3{	{ 1.0, 1.0, 0.0 }, { -1.0, 1.0, 0.0 }, { 1.0, -1.0, 0.0},	{ -1.0, -1.0, 0.0 },
-				{ 1.0, 0.0, 1.0 }, { -1.0, 0.0, 1.0 }, { 1.0, 0.0, -1.0 },	{ -1.0, 0.0, -1.0 },
-				{ 0.0, 1.0, 1.0 }, { 0.0, -1.0, 1.0 }, { 0.0, 1.0, -1.0 },	{ 0.0, -1.0, -1.0 }	}
+    :   grad3{  { 1.0, 1.0, 0.0 }, { -1.0, 1.0, 0.0 }, { 1.0, -1.0, 0.0},   { -1.0, -1.0, 0.0 },
+                { 1.0, 0.0, 1.0 }, { -1.0, 0.0, 1.0 }, { 1.0, 0.0, -1.0 },  { -1.0, 0.0, -1.0 },
+                { 0.0, 1.0, 1.0 }, { 0.0, -1.0, 1.0 }, { 0.0, 1.0, -1.0 },  { 0.0, -1.0, -1.0 } }
 {
-	srand( seed );
+    srand( seed );
 
-	for ( int i = 0; i < 256; i++ )
-	{
-		perm[i] = ( rand() % 256 ) & 255;
-		perm[i+256] = perm[i];
-	}
+    for ( int i = 0; i < 256; i++ )
+    {
+        perm[i] = ( rand() % 256 ) & 255;
+        perm[i+256] = perm[i];
+    }
 }
