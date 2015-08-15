@@ -183,7 +183,7 @@ void cck::Globe::SampleData( const cck::GeoCoord& sampleCoord, double& sampleHei
         }
     }
 
-    double highestHeight = std::numeric_limits<double>::min();
+    double highestHeight = std::numeric_limits<double>::lowest();
     int highestId = -1;
 
     for ( const auto& edge : edges )
